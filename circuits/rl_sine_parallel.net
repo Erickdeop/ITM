@@ -1,0 +1,4 @@
+* Parallel RL excited by sinusoidal voltage
+R1 1 0 10
+L1 1 0 1e-3
+V1 1 0 AC 0 1.0 60.0 0.0

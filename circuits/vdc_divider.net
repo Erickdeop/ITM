@@ -1,0 +1,4 @@
+* Resistive divider (DC) with two nodes to probe
+R1 1 2 1000
+R2 2 0 1000
+V1 1 0 DC 10.0

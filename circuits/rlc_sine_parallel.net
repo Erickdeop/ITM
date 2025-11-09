@@ -1,0 +1,5 @@
+* Parallel RLC excited by sinusoidal voltage
+R1 1 0 100
+L1 1 0 10e-3
+C1 1 0 1e-6
+V1 1 0 AC 0 1.0 1000.0 0.0

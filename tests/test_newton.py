@@ -12,12 +12,15 @@ from simulator.elements.base import TimeMethod
 def test_example_tran_transient_runs():
     data = parse_netlist("circuits/example_tran.net")
 
+    # vetor inicial obrigatório
+    v0 = np.zeros(data.max_node + 1)
+
     t, out = solve_tran(
         data,
         total_time=0.01,
         dt=1e-4,
         nr_tol=1e-6,
-        v0_vector=None,
+        v0_vector=v0,
         desired_nodes=[1],
         method=TimeMethod.BACKWARD_EULER
     )
@@ -37,7 +40,9 @@ def test_example_tran_transient_runs():
 def test_example_dc_solve():
     data = parse_netlist("circuits/example_dc.net")
 
-    out = solve_dc(data, nr_tol=1e-6, v0_vector=None, desired_nodes=[1])
+    v0 = np.zeros(data.max_node + 1)
+
+    out = solve_dc(data, nr_tol=1e-6, v0_vector=v0, desired_nodes=[1])
 
     assert isinstance(out, np.ndarray)
     assert out.size == 1
@@ -50,7 +55,9 @@ def test_example_dc_solve():
 def test_vdc_divider_runs():
     data = parse_netlist("circuits/vdc_divider.net")
 
-    out = solve_dc(data, nr_tol=1e-6, v0_vector=None, desired_nodes=[2])
+    v0 = np.zeros(data.max_node + 1)
+
+    out = solve_dc(data, nr_tol=1e-6, v0_vector=v0, desired_nodes=[2])
 
     assert isinstance(out, np.ndarray)
     assert out.size == 1
@@ -61,28 +68,28 @@ def test_vdc_divider_runs():
 # TESTE 4 — caso impossível (testa falha NR)
 # ============================================================
 def test_newton_fail():
-    """
-    Verifica se NR falha corretamente quando colocar uma netlist impossível.
-    """
     impossible = """
-* circuito impossível para NR
-R1 1 0 1
+* Duas fontes de tensão conflitantes no mesmo nó
 V1 1 0 DC 5
-R2 1 0 1
+V2 1 0 DC 3
 .end
 """
+
     with open("circuits/impossible.net", "w") as f:
         f.write(impossible)
 
     data = parse_netlist("circuits/impossible.net")
 
+    v0 = np.zeros(data.max_node + 1)
+
+    # O solver DEVE falhar na iteração NR
     with pytest.raises(RuntimeError):
         solve_tran(
             data,
             total_time=0.001,
             dt=1e-4,
-            nr_tol=1e-12,
-            v0_vector=None,
+            nr_tol=1e-6,
+            v0_vector=v0,
             desired_nodes=[1],
             method=TimeMethod.BACKWARD_EULER
         )

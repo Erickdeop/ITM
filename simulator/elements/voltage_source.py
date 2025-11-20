@@ -38,6 +38,6 @@ class VoltageSource(Element):
     def stamp_dc(self, G: np.ndarray, I: np.ndarray):
         return self._stamp_common(G, I, self._value(0.0))
 
-    def stamp_transient(self, G, I, state, t, dt, method):
+    def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):
         G, I = self._stamp_common(G, I, self._value(t))
         return G, I, state

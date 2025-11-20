@@ -20,6 +20,6 @@ class Resistor(Element):
         G[self.b, self.a] -= g
         return G, I
 
-    def stamp_transient(self, G, I, state, t, dt, method):
+    def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):
         G, I = self.stamp_dc(G, I)
         return G, I, state

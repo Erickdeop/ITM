@@ -15,7 +15,7 @@ class Capacitor(Element):
     def stamp_dc(self, G: np.ndarray, I: np.ndarray):
         return G, I
 
-    def stamp_transient(self, G, I, state, t, dt, method):
+    def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):
         v_prev = state.get('v_prev', 0.0)
         i_prev = state.get('i_prev', 0.0)
 

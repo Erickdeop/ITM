@@ -32,7 +32,8 @@ def parse_netlist(path: str) -> NetlistOOP:
 
             p = line.split()
             element_type = p[0][0].upper()
-
+            if line.startswith("."):
+                continue
             # ------------------- RESISTOR -------------------
             if element_type == "R":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])

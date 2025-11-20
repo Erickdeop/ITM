@@ -27,7 +27,7 @@ class CurrentSource(Element):
         I[self.b] -= val        # sai por b
         return G, I
 
-    def stamp_transient(self, G, I, state, t, dt, method):
+    def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):
         val = self._value(t)
         I[self.a] += val
         I[self.b] -= val

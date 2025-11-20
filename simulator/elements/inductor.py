@@ -25,7 +25,7 @@ class Inductor(Element):
         G[k,self.a]+=1; G[k,self.b]-=1
         return G, I
 
-    def stamp_transient(self, G, I, state, t, dt, method):
+    def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):
         i_prev = state.get('i_prev', 0.0)
         v_prev = state.get('v_prev', 0.0)
         G, I = self._augment(G, I)

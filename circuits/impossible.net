@@ -1,0 +1,5 @@
+
+* Duas fontes de tensão conflitantes no mesmo nó
+V1 1 0 DC 5
+V2 1 0 DC 3
+.end

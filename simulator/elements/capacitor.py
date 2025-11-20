@@ -18,17 +18,28 @@ class Capacitor(Element):
     def stamp_transient(self, G, I, state, t, dt, method):
         v_prev = state.get('v_prev', 0.0)
         i_prev = state.get('i_prev', 0.0)
+
         if method == TimeMethod.BACKWARD_EULER:
             Gc = self.C/dt
             G[self.a,self.a]+=Gc; G[self.b,self.b]+=Gc
             G[self.a,self.b]-=Gc; G[self.b,self.a]-=Gc
             I[self.a]+=Gc*v_prev; I[self.b]+=-Gc*v_prev
+
         elif method == TimeMethod.FORWARD_EULER:
             i_eq = self.C*(0.0 - v_prev)/dt
             I[self.a]-=i_eq; I[self.b]+=i_eq
-        else:
-            Gc = 2*self.C/dt
-            G[self.a,self.a]+=Gc; G[self.b,self.b]+=Gc
-            G[self.a,self.b]-=Gc; G[self.b,self.a]-=Gc
-            I[self.a]+=Gc*v_prev + i_prev; I[self.b]+=-Gc*v_prev - i_prev
+
+        else:  # TRAPEZOIDAL
+            Gc = 2 * self.C / dt
+
+            G[self.a, self.a] += Gc
+            G[self.b, self.b] += Gc
+            G[self.a, self.b] -= Gc
+            G[self.b, self.a] -= Gc
+
+            Ieq = i_prev + Gc * v_prev
+
+            I[self.a] += Ieq
+            I[self.b] -= Ieq
+
         return G, I, state

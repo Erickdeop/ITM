@@ -7,6 +7,8 @@ from .elements.capacitor import Capacitor
 from .elements.inductor import Inductor
 from .elements.current_source import CurrentSource
 from .elements.voltage_source import VoltageSource
+from .elements.nonlinear_resistor import NonLinearResistor
+from .elements.diode import Diode
 
 
 @dataclass
@@ -100,6 +102,24 @@ def parse_netlist(path: str) -> NetlistOOP:
                 else:
                     raise ValueError(f"Formato inválido para tensão: {p}")
 
+                update_nodes(a, b)
+
+            # ------------------ NON LINEAR RESISTOR ------------------
+            elif element_type == "N":
+                # Format: Nxxx a b V1 I1 V2 I2 V3 I3 V4 I4
+                a = int(p[1]); b = int(p[2]) # Nodes
+                V1 = float(p[3]); I1 = float(p[4])
+                V2 = float(p[5]); I2 = float(p[6])
+                V3 = float(p[7]); I3 = float(p[8])
+                V4 = float(p[9]); I4 = float(p[10])
+                elems.append(NonLinearResistor(a, b, V1, V2, V3, V4, I1, I2, I3, I4))
+                update_nodes(a, b)
+                
+            # ------------------- DIODE -------------------
+            elif element_type == "D":
+                # Format: Dxxx a b
+                a = int(p[1]); b = int(p[2])
+                elems.append(Diode(a, b))
                 update_nodes(a, b)
 
             # -----------------------------------------------------

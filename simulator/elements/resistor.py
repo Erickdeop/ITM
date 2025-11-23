@@ -12,7 +12,7 @@ class Resistor(Element):
     def max_node(self) -> int:
         return max(self.a, self.b)
 
-    def stamp_dc(self, G: np.ndarray, I: np.ndarray):
+    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None):
         g = 1.0/self.R
         G[self.a, self.a] += g
         G[self.b, self.b] += g

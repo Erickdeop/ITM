@@ -20,7 +20,7 @@ class Inductor(Element):
         I2 = np.zeros((n+1,)); I2[:n]=I
         return G2, I2
 
-    def stamp_dc(self, G: np.ndarray, I: np.ndarray):
+    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None):
         G, I = self._augment(G, I)
         n = G.shape[0]-1; k = n
         G[self.a,k]+=1; G[self.b,k]-=1

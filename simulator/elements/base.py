@@ -16,7 +16,7 @@ class Element:
     def max_node(self) -> int:
         raise NotImplementedError
 
-    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess:Optional[np.ndarray] = None) -> Tuple[np.ndarray, np.ndarray]:
+    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None) -> Tuple[np.ndarray, np.ndarray]:
         return G, I
 
     def stamp_transient(self, G: np.ndarray, I: np.ndarray, state: Dict[str, Any], t: float, dt: float, method: TimeMethod):

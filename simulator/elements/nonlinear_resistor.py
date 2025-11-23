@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, Optional, ClassVar
+from typing import Tuple
 import numpy as np
 
 from .base import Element 
@@ -51,7 +51,7 @@ class NonLinearResistor(Element):
     def stamp_dc(self, 
                  G: np.ndarray, 
                  I: np.ndarray, 
-                 x_guess=None
+                 x_guess: np.ndarray
                  ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Estampa para a análise DC, dependendo da estimativa atual de x (voltages).

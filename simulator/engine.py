@@ -1,6 +1,5 @@
 from __future__ import annotations
 import numpy as np
-from scipy import linalg
 from .elements.base import TimeMethod
 from .newton import newton_solve
 from typing import Tuple, Optional, List, Dict, Any
@@ -67,8 +66,8 @@ def _build_mna_system(
         
         elif analysis_context == "DC":
             G, I = elem.stamp_dc(G, I, x_full)
-        if __debug__:
-            print(f"==> Stamped element: {elem}\n{G}\nI={I}")
+        #if __debug__:
+        #    print(f"==> Stamped element: {elem}\n{G}\nI={I}")
 
     # Remove 0th row and column (node 0)
     return G[1:, 1:], I[1:]

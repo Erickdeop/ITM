@@ -1,0 +1,5 @@
+V1 1 0 DC 5
+R1 1 2 1000
+D1 2 0
+
+* Run with: $ python3 -m simulator.circuit --netlist circuits/example_diode.net --analysis DC --nodes 1 2

@@ -8,6 +8,7 @@ class Inductor(Element):
     a: int
     b: int
     L: float
+    is_mna = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)

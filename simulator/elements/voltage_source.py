@@ -12,6 +12,7 @@ class VoltageSource(Element):
     freq: float = 0.0
     phase_deg: float = 0.0
     is_ac: bool = False
+    is_mna: bool = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)

@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np, math
 from .base import Element, TimeMethod
+from typing import ClassVar
 
 @dataclass
 class VoltageSource(Element):
@@ -12,7 +13,7 @@ class VoltageSource(Element):
     freq: float = 0.0
     phase_deg: float = 0.0
     is_ac: bool = False
-    is_mna: bool = True
+    is_mna: ClassVar[bool] = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)

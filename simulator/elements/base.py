@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, ClassVar
 import numpy as np
 
 class TimeMethod(Enum):
@@ -11,7 +11,7 @@ class TimeMethod(Enum):
 
 @dataclass
 class Element:
-    is_mna: bool = field(default=False, init=False) # Tells if the element adds MNA variables (new lines in matrix and vector)
+    is_mna: ClassVar[bool] = False # Tells if the element adds MNA variables (new lines in matrix and vector)
 
     def max_node(self) -> int:
         raise NotImplementedError

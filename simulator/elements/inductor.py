@@ -2,13 +2,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 from .base import Element, TimeMethod
+from typing import ClassVar
 
 @dataclass
 class Inductor(Element):
     a: int
     b: int
     L: float
-    is_mna = True
+    is_mna: ClassVar[bool] = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
+import numpy as np
 
 from .elements.resistor import Resistor
 from .elements.capacitor import Capacitor
@@ -112,7 +113,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 V2 = float(p[5]); I2 = float(p[6])
                 V3 = float(p[7]); I3 = float(p[8])
                 V4 = float(p[9]); I4 = float(p[10])
-                elems.append(NonLinearResistor(a, b, V1, V2, V3, V4, I1, I2, I3, I4))
+                elems.append(NonLinearResistor(a, b, np.array([V1, V2, V3, V4]), np.array([I1, I2, I3, I4])))
                 update_nodes(a, b)
                 
             # ------------------- DIODE -------------------

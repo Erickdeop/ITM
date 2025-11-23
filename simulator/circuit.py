@@ -74,7 +74,8 @@ def _cli():
     args = parser.parse_args()
 
     circuit = Circuit(args.netlist)
-    circuit.print()
+    if __debug__:
+        circuit.print()
 
     method_map = {
         "BE": TimeMethod.BACKWARD_EULER,

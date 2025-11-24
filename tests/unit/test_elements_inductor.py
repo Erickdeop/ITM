@@ -18,5 +18,5 @@ def test_inductor_stamp_transient_backward_euler():
     assert I2.shape == (3,)
 
     # R = L/dt = 1e-3 / 1e-5 = 100 ohms (equivalente)
-    assert G2[2,2] == pytest.approx(100.0, rel=1e-3)
-    assert I2[2] == pytest.approx(100.0 * 0.01, rel=1e-3)
+    assert G2[2,2] == pytest.approx(-100.0, rel=1e-3)
+    assert I2[2] == pytest.approx(-100.0 * 0.01, rel=1e-3)

@@ -36,10 +36,12 @@ class Inductor(Element):
         G[k,self.a]+=1; G[k,self.b]-=1
         if method == TimeMethod.BACKWARD_EULER:
             R = self.L/dt
-            G[k,k]+=R; I[k]+=R*i_prev
+            G[k,k]-=R
+            I[k]-=R*i_prev
         elif method == TimeMethod.FORWARD_EULER:
             pass
         else:
             R = 2*self.L/dt
-            G[k,k]+=R; I[k]+=R*i_prev + v_prev
+            G[k,k]-=R 
+            I[k]-=R*i_prev + v_prev
         return G, I, state

@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np, math
 from .base import Element, TimeMethod
+from typing import ClassVar
 
 @dataclass
 class VoltageSource(Element):
@@ -12,6 +13,7 @@ class VoltageSource(Element):
     freq: float = 0.0
     phase_deg: float = 0.0
     is_ac: bool = False
+    is_mna: ClassVar[bool] = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)
@@ -35,7 +37,7 @@ class VoltageSource(Element):
         I[k] += val
         return G, I
 
-    def stamp_dc(self, G: np.ndarray, I: np.ndarray):
+    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None):
         return self._stamp_common(G, I, self._value(0.0))
 
     def stamp_transient(self, G, I, state, t, dt, method, x_guess=None):

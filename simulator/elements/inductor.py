@@ -2,12 +2,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 from .base import Element, TimeMethod
+from typing import ClassVar
 
 @dataclass
 class Inductor(Element):
     a: int
     b: int
     L: float
+    is_mna: ClassVar[bool] = True
 
     def max_node(self) -> int:
         return max(self.a, self.b)
@@ -18,7 +20,7 @@ class Inductor(Element):
         I2 = np.zeros((n+1,)); I2[:n]=I
         return G2, I2
 
-    def stamp_dc(self, G: np.ndarray, I: np.ndarray):
+    def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None):
         G, I = self._augment(G, I)
         n = G.shape[0]-1; k = n
         G[self.a,k]+=1; G[self.b,k]-=1
@@ -34,10 +36,12 @@ class Inductor(Element):
         G[k,self.a]+=1; G[k,self.b]-=1
         if method == TimeMethod.BACKWARD_EULER:
             R = self.L/dt
-            G[k,k]+=R; I[k]+=R*i_prev
+            G[k,k]-=R
+            I[k]-=R*i_prev
         elif method == TimeMethod.FORWARD_EULER:
             pass
         else:
             R = 2*self.L/dt
-            G[k,k]+=R; I[k]+=R*i_prev + v_prev
+            G[k,k]-=R 
+            I[k]-=R*i_prev + v_prev
         return G, I, state

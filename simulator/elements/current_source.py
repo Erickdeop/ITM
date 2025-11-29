@@ -21,7 +21,7 @@ class CurrentSource(Element):
             return self.dc
         return self.dc + self.amp*math.cos(2*math.pi*self.freq*t + math.radians(self.phase_deg))
 
-    def stamp_dc(self, G, I):
+    def stamp_dc(self, G, I, x_guess=None):
         val = self._value(0.0)  # corrente
         I[self.a] += val        # entra em a
         I[self.b] -= val        # sai por b

@@ -50,6 +50,11 @@ class Circuit:
             desired_nodes,
             method
         )
+    def print(self):
+        print(f"\nCIRCUIT ELEMENTS - MAX NODES={self.data.max_node}")
+        for elem in self.data.elements:
+            print("  -", elem)
+        print("\n")
 
 
 # ======================================================
@@ -69,6 +74,8 @@ def _cli():
     args = parser.parse_args()
 
     circuit = Circuit(args.netlist)
+    if __debug__:
+        circuit.print()
 
     method_map = {
         "BE": TimeMethod.BACKWARD_EULER,

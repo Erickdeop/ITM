@@ -1,0 +1,5 @@
+C1 1 0 1e-6 5.0
+R1 1 0 1e3
+
+* Run with: python -m simulator.circuit --netlist ./circuits/example_rc_ic.net --analysis TRAN --total_time 5e-3 --dt 1e-5 --method TRAP --nodes 1
+* Expected: Dacay from 5V to 0V

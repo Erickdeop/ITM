@@ -184,9 +184,21 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
 
             elif elem.__class__.__name__ == "Inductor":
                 if method == TimeMethod.BACKWARD_EULER:
-                     R = elem.L / dt
-                     st["i_prev"] = (x[elem.a] - x[elem.b]) / R
+                    # i_new = i_old + (dt/L) * v
+                    i_old = st.get("i_prev", elem.i0)
+                    v = x[elem.a] - x[elem.b]
+                    i_new = i_old + (dt / elem.L) * v
+                    st["i_prev"] = i_new
 
+                elif method == TimeMethod.TRAPEZOIDAL:
+                    # i_new = i_old + (dt/(2L)) * (v_new + v_old)
+                    i_old = st.get("i_prev", elem.i0)
+                    v_old = st.get("v_prev", 0.0)
+                    v = x[elem.a] - x[elem.b]
+                    i_new = i_old + (dt / (2 * elem.L)) * (v + v_old)
+                    st["i_prev"] = i_new
+                    st["v_prev"] = v
+            
             states[idx] = st
 
         # save desired nodes

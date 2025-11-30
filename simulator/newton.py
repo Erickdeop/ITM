@@ -7,7 +7,7 @@ def newton_solve(
     build_mna: Callable[[np.ndarray], Tuple[np.ndarray, np.ndarray]], 
     x0: np.ndarray, 
     tol: float = 1e-6, 
-    max_iter: int = 25 # Market default
+    max_iter: int = 50 # Market default
 ) -> np.ndarray:
     """
     Newton-Raphson Solver for Non-Linear Systems.

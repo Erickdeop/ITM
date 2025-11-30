@@ -17,6 +17,12 @@ class NetlistOOP:
     elements: List[object]
     max_node: int
 
+def _parse_ic_token(token: str) -> float:
+    token = token.strip()
+    if token.upper().startswith("IC="):
+        token = token.split("=", 1)[1]
+    return float(token)
+
 
 def parse_netlist(path: str) -> NetlistOOP:
     elems = []
@@ -46,13 +52,15 @@ def parse_netlist(path: str) -> NetlistOOP:
             # ------------------- CAPACITOR -------------------
             elif element_type == "C":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
-                elems.append(Capacitor(a, b, val))
+                ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
+                elems.append(Capacitor(a, b, val, ic))
                 update_nodes(a, b)
 
             # ------------------- INDUCTOR -------------------
             elif element_type == "L":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
-                elems.append(Inductor(a, b, val))
+                ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
+                elems.append(Inductor(a, b, val, ic))
                 update_nodes(a, b)
 
             # ------------------- CURRENT SOURCE -------------------
@@ -113,7 +121,11 @@ def parse_netlist(path: str) -> NetlistOOP:
                 V2 = float(p[5]); I2 = float(p[6])
                 V3 = float(p[7]); I3 = float(p[8])
                 V4 = float(p[9]); I4 = float(p[10])
-                elems.append(NonLinearResistor(a, b, np.array([V1, V2, V3, V4]), np.array([I1, I2, I3, I4])))
+                elems.append(NonLinearResistor(
+                    a, b, 
+                    np.array([V1, V2, V3, V4]), 
+                    np.array([I1, I2, I3, I4])
+                    ))
                 update_nodes(a, b)
                 
             # ------------------- DIODE -------------------

@@ -1,0 +1,5 @@
+L1 1 0 1e-3 1.0
+R1 1 0 10
+
+* Run with: python -m simulator.circuit --netlist ./circuits/example_rl_ic.net --analysis TRAN --total_time 5e-4 --dt 1e-6 --method TRAP --nodes 1
+* Expected: Rise from -10V to 0V (not working)

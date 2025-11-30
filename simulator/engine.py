@@ -3,14 +3,13 @@ import numpy as np
 from .elements.base import TimeMethod
 from .newton import newton_solve
 from typing import Tuple, Optional, List, Dict, Any
+from simulator.plotting.plot_utils import load_sim_file, plot_simulation
+
 
 # Elements that add extra variables in MNA (new line in matrix and vector)
 
 def get_total_variables(data):
-    """
-    Calculates the total number of variables in the MNA system
-    (max_node + 1) + (extra MNA variables).
-    """
+
     n_nodes = data.max_node + 1
     n_extra = 0
     
@@ -72,9 +71,8 @@ def _build_mna_system(
     # Remove 0th row and column (node 0)
     return G[1:, 1:], I[1:]
 
-# ============================================================
-#                      DC SOLVER
-# ============================================================
+#  DC SOLVER
+
 def solve_dc(data, nr_tol, v0_vector, desired_nodes):
     """
     Solve DC analysis. 
@@ -111,9 +109,7 @@ def solve_dc(data, nr_tol, v0_vector, desired_nodes):
     # If so, we can return the full x vector
     return np.array([x[node] for node in desired_nodes])
 
-# ============================================================
-#              TRANSIENT SOLVER (NR + BE/TRAP/FE)
-# ============================================================
+#TRANSIENT SOLVER (NR + BE/TRAP/FE)
 def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
     """
     Solve transient (over time) analysis.
@@ -139,14 +135,12 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         else:
             x = v0_vector.copy()
 
-    # ============================================
-    # TIME LOOP
-    # ============================================
+    # time loop
     for ti, t in enumerate(times):
 
         x_prev = x.copy()
 
-        # ---------- build MNA system ----------
+        # build MNA system 
         def build_mna(x_guess_red: np.ndarray):
             # Previous function moved to include DC analysis
             G_red, I_red = _build_mna_system(
@@ -160,9 +154,7 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
             )
             return G_red, I_red
 
-        # ---------- solve MNA (Newton-Raphson) ----------
-        # Passamos o chute inicial reduzido (sem o nó 0)
-        # x_prev tem tamanho n_total. x_prev[1:] tem tamanho n_total-1.
+        #solve MNA (Newton-Raphson) 
         try:
             x_red = newton_solve(build_mna, x_prev[1:], tol=nr_tol)
         except Exception as e:
@@ -176,9 +168,7 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         for idx, elem in enumerate(data.elements):
             st = states[idx]
             
-            # Reactive elements need to store previous voltages/currents
-            # TODO: Generalize this with an interface in the elements in 
-            # order to avoid class name checks (better OOP)
+       
             if elem.__class__.__name__ == "Capacitor":
                 st["v_prev"] = x[elem.a] - x[elem.b]
 
@@ -192,5 +182,17 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         # save desired nodes
         for j, node in enumerate(desired_nodes):
             out[j, ti] = x[node]
+
+
+    py_vars = {
+        f"Node_{node}": out[j, :]
+        for j, node in enumerate(desired_nodes)
+    }
+
+    # loading .sim
+    sim_time, sim_vars = load_sim_file(data.netlist_path)
+
+    # plot final
+    plot_simulation(times, py_vars, sim_time, sim_vars)
 
     return times, out

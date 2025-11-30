@@ -175,7 +175,6 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         # ---------- update states ----------
         for idx, elem in enumerate(data.elements):
             st = states[idx]
-            print (f"Element {elem} state before update: {st}")
             
             # Reactive elements need to store previous voltages/currents
             # TODO: Generalize this with an interface in the elements in 
@@ -201,7 +200,6 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
                     st["v_prev"] = v
             
             states[idx] = st
-            print (f"Element {elem} state after update: {st}")
 
         # save desired nodes
         for j, node in enumerate(desired_nodes):

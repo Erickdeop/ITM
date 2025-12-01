@@ -13,9 +13,9 @@ from .elements.diode import Diode
 
 @dataclass
 class TransientSettings:
-    tran: bool = False      # [1]
-    time: float = 0.0       # [2]
-    sim_step: float = 0.0   # [3]
+    enabled: bool = False   # [1]
+    t_stop: float = 0.0     # [2]
+    dt: float = 0.0         # [3]
     method: str = "BE"      # [4] BE, FE or TRAP
     intetnal_steps: int = 0 # [5] 
     uic: bool = True        # [6] use initial conditions: Optional
@@ -70,11 +70,11 @@ def parse_netlist(path: str) -> NetlistOOP:
                 if len(p) < 5:
                         raise ValueError("\033[31mIncomplete Transient settings:\33[0m Linha .TRAN"
                                          " requer pelo menos 5 argumentos no seguinte formato: "
-                                         "\n .TRAN <tstop> <tstep> <method> <internal_steps> [UIC]")
+                                         "\n .TRAN <tstop> <dt> <method> <internal_steps> [UIC]")
                 ts = TransientSettings(
-                    tran = True,
-                    time = float(p[1]),
-                    sim_step = float(p[2]),
+                    enabled = True,
+                    t_stop = float(p[1]),
+                    dt = float(p[2]),
                     method = p[3].upper(),
                     intetnal_steps = int(p[4])
                     )
@@ -168,4 +168,5 @@ def parse_netlist(path: str) -> NetlistOOP:
             else:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
+    print(NetlistOOP(elems, maxnode , ts))
     return NetlistOOP(elems, maxnode , ts)

@@ -16,6 +16,7 @@ def test_diode_series_circuit(tmp_path):
 
     netlist = """
     * Diode test
+    2
     V1 1 0 DC 5
     R1 1 2 1000
     D1 2 0
@@ -35,6 +36,7 @@ def test_nonlinear_resistor_divider(tmp_path):
     """
     netlist = """
     * NLR Divisor
+    2
     V1 1 0 DC 5
     R1 1 2 1.0
     N1 2 0 0 0 1 1 2 3 4 4
@@ -55,6 +57,7 @@ def test_diode_convergence_failure(tmp_path):
     """
     netlist = """
     * Diode convergence failure test
+    1
     I1 0 1 DC 1000
     D1 1 0
     """

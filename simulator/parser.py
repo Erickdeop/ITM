@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 import numpy as np
 
@@ -11,11 +11,20 @@ from .elements.voltage_source import VoltageSource
 from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
 
+@dataclass
+class TransientSettings:
+    enabled: bool = False   # [1]
+    t_stop: float = 0.0     # [2]
+    dt: float = 0.0         # [3]
+    method: str = "BE"      # [4] BE, FE or TRAP
+    intetnal_steps: int = 0 # [5] 
+    uic: bool = True        # [6] use initial conditions: Optional
 
 @dataclass
 class NetlistOOP:
     elements: List[object]
     max_node: int
+    transient: TransientSettings = field(default_factory=TransientSettings)
 
 def _parse_ic_token(token: str) -> float:
     token = token.strip()
@@ -24,15 +33,30 @@ def _parse_ic_token(token: str) -> float:
     return float(token)
 
 
+
 def parse_netlist(path: str) -> NetlistOOP:
     elems = []
     maxnode = 0
-
-    def update_nodes(*ns):
-        nonlocal maxnode
-        maxnode = max(maxnode, *ns)
+    ts = TransientSettings()
 
     with open(path, "r") as f:
+        # --------- GET MAX NODES ---------
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("*"):
+                continue
+            try:
+                maxnode = int(line)
+            except ValueError:
+                raise ValueError(
+                    f"\033[31mNo Max Nodes:\33[0m A primeira linha válida da netlist deve ser um inteiro "
+                    f"com o número máximo de nós. Recebido: {line!r}"
+                )
+            break
+
+        if maxnode is None or maxnode <= 0:
+            raise ValueError("\033[31mNo Netlist:\33[0m Netlist vazia ou sem linha de número de nós.")
+
         for raw in f:
             line = raw.strip()
 
@@ -41,27 +65,36 @@ def parse_netlist(path: str) -> NetlistOOP:
 
             p = line.split()
             element_type = p[0][0].upper()
+            # ---------------- SET TRANSIENT -----------------
             if line.startswith("."):
-                continue
+                if len(p) < 5:
+                        raise ValueError("\033[31mIncomplete Transient settings:\33[0m Linha .TRAN"
+                                         " requer pelo menos 5 argumentos no seguinte formato: "
+                                         "\n .TRAN <tstop> <dt> <method> <internal_steps> [UIC]")
+                ts = TransientSettings(
+                    enabled = True,
+                    t_stop = float(p[1]),
+                    dt = float(p[2]),
+                    method = p[3].upper(),
+                    intetnal_steps = int(p[4])
+                    )
+                # When not use UIC?
             # ------------------- RESISTOR -------------------
-            if element_type == "R":
+            elif element_type == "R":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
                 elems.append(Resistor(a, b, val))
-                update_nodes(a, b)
 
             # ------------------- CAPACITOR -------------------
             elif element_type == "C":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
                 ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
                 elems.append(Capacitor(a, b, val, ic))
-                update_nodes(a, b)
 
             # ------------------- INDUCTOR -------------------
             elif element_type == "L":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
                 ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
                 elems.append(Inductor(a, b, val, ic))
-                update_nodes(a, b)
 
             # ------------------- CURRENT SOURCE -------------------
             elif element_type == "I":
@@ -84,9 +117,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                         phase_deg=phase, is_ac=True
                     ))
                 else:
-                    raise ValueError(f"Formato inválido para corrente: {p}")
-
-                update_nodes(a, b)
+                    raise ValueError(f"\033[31mInvalid Format:\33[0m Formato inválido para corrente: {p}")
 
             # ------------------- VOLTAGE SOURCE -------------------
             elif element_type == "V":
@@ -109,9 +140,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                         phase_deg=phase, is_ac=True
                     ))
                 else:
-                    raise ValueError(f"Formato inválido para tensão: {p}")
-
-                update_nodes(a, b)
+                    raise ValueError(f"\033[31mInvalid Format:\33[0m Formato inválido para tensão: {p}")
 
             # ------------------ NON LINEAR RESISTOR ------------------
             elif element_type == "N":
@@ -126,19 +155,18 @@ def parse_netlist(path: str) -> NetlistOOP:
                     np.array([V1, V2, V3, V4]), 
                     np.array([I1, I2, I3, I4])
                     ))
-                update_nodes(a, b)
                 
             # ------------------- DIODE -------------------
             elif element_type == "D":
                 # Format: Dxxx a b
                 a = int(p[1]); b = int(p[2])
                 elems.append(Diode(a, b))
-                update_nodes(a, b)
 
             # -----------------------------------------------------
             # FUTUROS ELEMENTOS (diode, opamp, mosfet, etc)
             # -----------------------------------------------------
             else:
-                raise ValueError(f"Elemento não reconhecido: {p}")
+                raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
-    return NetlistOOP(elems, maxnode)
+    print(NetlistOOP(elems, maxnode , ts))
+    return NetlistOOP(elems, maxnode , ts)

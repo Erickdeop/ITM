@@ -65,9 +65,9 @@ def test_vdc_divider_runs():
 def test_newton_fail():
     impossible = """
 * Duas fontes de tensão conflitantes no mesmo nó
+1
 V1 1 0 DC 5
 V2 1 0 DC 3
-.end
 """
 
     with open("circuits/impossible.net", "w") as f:

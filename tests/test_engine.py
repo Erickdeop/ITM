@@ -15,6 +15,7 @@ def write_tmp(path, text):
 def test_dc_divider(tmp_path):
 
     nl = """
+2
 V1 1 0 DC 10
 R1 1 2 1000
 R2 2 0 1000
@@ -38,6 +39,7 @@ R2 2 0 1000
 def test_transient_rc(tmp_path):
 
     nl = """
+2
 V1 1 0 DC 5
 R1 1 2 1000
 C1 2 0 0.00001
@@ -75,6 +77,7 @@ C1 2 0 0.00001
 def test_transient_rl(tmp_path):
 
     nl = """
+2
 V1 1 0 DC 5
 R1 1 2 50
 L1 2 0 0.001

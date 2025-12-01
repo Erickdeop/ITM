@@ -1,2 +1,5 @@
+1
 R1 1 0 1000
 V1 1 0 DC 5.0
+
+* Run with: python3 -m simulator.circuit --netlist circuits/example_dc.net --nodes 1

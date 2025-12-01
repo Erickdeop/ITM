@@ -1,5 +1,9 @@
 * Parallel RLC excited by sinusoidal voltage
+1
 R1 1 0 100
 L1 1 0 10e-3
 C1 1 0 1e-6
 V1 1 0 AC 0 1.0 1000.0 0.0
+.TRAN 0.02 1e-5 BE 1
+
+* Run with: python3 -m simulator.circuit --netlist circuits/rlc_sine_parallel.net --nodes 1

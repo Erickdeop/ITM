@@ -1,3 +1,7 @@
 * Resistor fed by sinusoidal current source
+1
 R1 1 0 1000
 I1 1 0 AC 0 1e-3 1000.0 0.0
+.TRAN 0.01 1e-5 BE 1
+
+* Run with: python3 -m simulator.circuit --netlist circuits/r_current_source_ac.net --nodes 1

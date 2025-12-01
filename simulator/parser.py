@@ -126,7 +126,7 @@ def parse_netlist(path: str) -> NetlistOOP:
 
                 if stype == "DC":
                     dc = float(p[4])
-                    elems.append(VoltageSource(a, b, dc=dc, is_ac=False))
+                    elems.append(VoltageSource(a, b, dc=dc, is_ac=False, source_type="DC"))
 
                 elif stype == "AC":
                     dc = float(p[4]) if len(p) > 4 else 0.0
@@ -137,8 +137,59 @@ def parse_netlist(path: str) -> NetlistOOP:
                     elems.append(VoltageSource(
                         a, b,
                         dc=dc, amp=amp, freq=freq,
-                        phase_deg=phase, is_ac=True
+                        phase_deg=phase, is_ac=True, source_type="AC"
                     ))
+
+                elif stype == "SIN":
+                    offset = float(p[4]) if len(p) > 4 else 0.0
+                    amplitude = float(p[5]) if len(p) > 5 else 0.0
+                    freq = float(p[6]) if len(p) > 6 else 0.0
+                    delay = float(p[7]) if len(p) > 7 else 0.0
+                    damping = float(p[8]) if len(p) > 8 else 0.0
+                    phase = float(p[9]) if len(p) > 9 else 0.0
+                    
+                    sin_params = {
+                        "offset": offset,
+                        "amplitude": amplitude,
+                        "freq": freq,
+                        "delay": delay,
+                        "damping": damping,
+                        "phase": phase
+                    }
+                    
+                    elems.append(VoltageSource(
+                        a, b,
+                        dc=offset,  # DC analysis
+                        source_type="SIN",
+                        sin_params=sin_params
+                    ))
+
+                elif stype == "PULSE":
+                    v1 = float(p[4]) if len(p) > 4 else 0.0
+                    v2 = float(p[5]) if len(p) > 5 else 0.0
+                    delay = float(p[6]) if len(p) > 6 else 0.0
+                    rise_time = float(p[7]) if len(p) > 7 else 0.0
+                    fall_time = float(p[8]) if len(p) > 8 else 0.0
+                    pulse_width = float(p[9]) if len(p) > 9 else 0.0
+                    period = float(p[10]) if len(p) > 10 else 0.0
+                    
+                    pulse_params = {
+                        "v1": v1,
+                        "v2": v2,
+                        "delay": delay,
+                        "rise_time": rise_time,
+                        "fall_time": fall_time,
+                        "pulse_width": pulse_width,
+                        "period": period
+                    }
+                    
+                    elems.append(VoltageSource(
+                        a, b,
+                        dc=v1,  # DC analysis
+                        source_type="PULSE",
+                        pulse_params=pulse_params
+                    ))
+
                 else:
                     raise ValueError(f"\033[31mInvalid Format:\33[0m Formato inválido para tensão: {p}")
 

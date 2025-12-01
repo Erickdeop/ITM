@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 import numpy as np
 
@@ -24,7 +24,7 @@ class TransientSettings:
 class NetlistOOP:
     elements: List[object]
     max_node: int
-    transient: TransientSettings = TransientSettings()
+    transient: TransientSettings = field(default_factory=TransientSettings)
 
 def _parse_ic_token(token: str) -> float:
     token = token.strip()

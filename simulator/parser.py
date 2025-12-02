@@ -26,6 +26,7 @@ class NetlistOOP:
     max_node: int
     transient: TransientSettings = field(default_factory=TransientSettings)
 
+
 def _parse_ic_token(token: str) -> float:
     token = token.strip()
     if token.upper().startswith("IC="):
@@ -43,6 +44,7 @@ def parse_netlist(path: str) -> NetlistOOP:
         # --------- GET MAX NODES ---------
         for raw in f:
             line = raw.strip()
+
             if not line or line.startswith("*"):
                 continue
             try:
@@ -219,5 +221,8 @@ def parse_netlist(path: str) -> NetlistOOP:
             else:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
-    print(NetlistOOP(elems, maxnode , ts))
-    return NetlistOOP(elems, maxnode , ts)
+    nl = NetlistOOP(elems, maxnode, ts)
+    nl.netlist_path = path  
+    print(nl)               
+    return nl             
+

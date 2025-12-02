@@ -3,6 +3,7 @@ import numpy as np
 from .elements.base import TimeMethod
 from .newton import newton_solve
 from typing import Tuple, Optional, List, Dict, Any
+from simulator.plotting.plot_utils import load_sim_file, plot_simulation
 
 # Elements that add extra variables in MNA (new line in matrix and vector)
 
@@ -205,4 +206,11 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         for j, node in enumerate(desired_nodes):
             out[j, ti] = x[node]
 
+    py_vars = {
+        f"Node_{node}": out[j, :]
+        for j, node in enumerate(desired_nodes)
+    }
+
+    # loading .sim
+    
     return times, out

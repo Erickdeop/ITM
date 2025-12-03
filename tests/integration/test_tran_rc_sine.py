@@ -1,9 +1,10 @@
 import numpy as np, pytest
 from simulator.circuit import Circuit
 from simulator.elements.base import TimeMethod
+from simulator.parser import parse_netlist
 
 def test_tran_rc_sine_parallel_amplitude():
-    c = Circuit('circuits/rc_sine_parallel.net')
+    c = Circuit(parse_netlist('circuits/rc_sine_parallel.net'))
     t, out = c.run_tran([1])
     v = out[0]
     vmax = float(np.max(np.abs(v[int(0.5*len(v)):])))

@@ -9,12 +9,15 @@ from .elements.base import TimeMethod
 
 class Circuit:
     def __init__(self, netlist_path: str):
-        # Apenas lê o netlist. Nada de self.data.sim
+        # Data holds the parsed netlist
         self.data = parse_netlist(netlist_path)
 
     # ------------------------ DC ------------------------
-    def run_dc(self, desired_nodes, nr_tol: float = 1e-8, v0_vector=None):
+    def run_dc(self, desired_nodes=None, nr_tol: float = 1e-8, v0_vector=None):
         n = self.data.max_node + 1
+        
+        if desired_nodes is None:
+            desired_nodes = list(range(1, n))
 
         if v0_vector is None:
             v0_vector = np.zeros(n)
@@ -29,7 +32,7 @@ class Circuit:
     # --------------------- TRANSIENT ---------------------
     def run_tran(
         self,
-        desired_nodes,
+        desired_nodes=None,
         nr_tol: float = 1e-8,
         v0_vector=None
     ):
@@ -40,6 +43,8 @@ class Circuit:
             )
 
         n = self.data.max_node + 1
+        if desired_nodes is None:
+            desired_nodes = list(range(1, n))
 
         if v0_vector is None:
             v0_vector = np.zeros(n)
@@ -63,50 +68,19 @@ class Circuit:
         )
     
     def print(self):
-        print(f"\nCIRCUIT ELEMENTS - MAX NODES={self.data.max_node}")
+        print(f"\n==> CIRCUIT ELEMENTS - MAX NODES={self.data.max_node}")
         for elem in self.data.elements:
             print("  -", elem)
-        print("\n")
         # Se quiser, pode imprimir também as configs de transiente:
         ts = self.data.transient
         if ts.enabled:
             print(
-                f"TRANSIENT: t_stop={ts.t_stop}, dt={ts.dt}, "
-                f"method={ts.method}, internal={ts.intetnal_steps}, uic={ts.uic}"
+                f"Transient settings: t_stop={ts.t_stop}, dt={ts.dt}, method={ts.method},"
+                f" internal step={ts.intetnal_steps}, uic={ts.uic}\n"
             )
 
 
 # ======================================================
 #                        CLI
 # ======================================================
-def _cli():
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument("--netlist", required=True)
-    parser.add_argument("--nr_tol", type=float, default=1e-8)
-    parser.add_argument("--nodes", nargs="+", type=int, default=[1])
-    parser.add_argument("--guide", type=str) # existing .sim file path to print alongsige
-
-    args = parser.parse_args()
-
-    circuit = Circuit(args.netlist)
-    if __debug__:
-        circuit.print()
-
-    if circuit.data.transient.enabled:
-        t, out = circuit.run_tran(
-            args.nodes,
-            nr_tol=args.nr_tol,
-        )
-
-        print("TRAN points:", len(t))
-        for i, node in enumerate(args.nodes):
-            print(f"Node {node} first samples:", out[i, :10].tolist())
-    else:
-        # Análise DC
-        result = circuit.run_dc(args.nodes, nr_tol=args.nr_tol)
-        print("DC Result:", dict(zip(args.nodes, result.tolist())))
-
-
-if __name__ == "__main__":
-    _cli()

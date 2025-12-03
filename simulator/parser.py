@@ -222,7 +222,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
     nl = NetlistOOP(elems, maxnode, ts)
-    nl.netlist_path = path  
-    print(nl)               
+    nl.netlist_path = path   # type: ignore    
+    print (nl)       
     return nl             
 

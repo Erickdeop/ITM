@@ -11,13 +11,23 @@ def get_total_variables(data):
     """
     Calculates the total number of variables in the MNA system
     (max_node + 1) + (extra MNA variables).
+    
+    Note: Most MNA elements add 1 variable, but CCVS adds 2 variables.
     """
     n_nodes = data.max_node + 1
     n_extra = 0
     
     for elem in data.elements:
         if elem.is_mna:
-            n_extra += 1
+            # Check if this element adds more than 1 MNA variable
+            if hasattr(elem, 'mna_variables'):
+                n_extra += elem.mna_variables()
+            elif elem.__class__.__name__ == 'CCVS':
+                # CCVS adds 2 variables (control current + output current)
+                n_extra += 2
+            else:
+                # Most elements (VoltageSource, VCVS, CCCS) add 1 variable
+                n_extra += 1
             
     return n_nodes + n_extra
 
@@ -110,7 +120,10 @@ def solve_dc(data, nr_tol, v0_vector, desired_nodes):
 
     # TODO: Every node should be a desired node?
     # If so, we can return the full x vector
-    return np.array([x[node] for node in desired_nodes])
+    if desired_nodes is not None:
+        return np.array([x[node] for node in desired_nodes])
+    else:
+        return x
 
 # ============================================================
 #              TRANSIENT SOLVER (NR + BE/TRAP/FE)

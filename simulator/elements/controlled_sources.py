@@ -127,8 +127,8 @@ class CCVS(Element):
 
     def stamp_dc(self, G: np.ndarray, I: np.ndarray, x_guess=None):
         n = G.shape[0]
-        x_idx = n      # output current variable
-        y_idx = n + 1  # control current variable
+        i_control_idx = n      # control current variable
+        i_output_idx = n + 1   # output current variable
         
         # Expand matrices for 2 additional variables
         G_new = np.zeros((n+2, n+2))
@@ -136,22 +136,22 @@ class CCVS(Element):
         I_new = np.zeros(n+2)
         I_new[:n] = I
         
-        # Output voltage source
-        G_new[self.a, x_idx] = 1.0
-        G_new[self.b, x_idx] = -1.0
+        # KCL: Control current enters at c, exits at d
+        G_new[self.c, i_control_idx] = 1.0
+        G_new[self.d, i_control_idx] = -1.0
         
-        # Control current measurement
-        G_new[self.c, y_idx] = 1.0
-        G_new[self.d, y_idx] = -1.0
+        # KCL: Output current enters at a, exits at b
+        G_new[self.a, i_output_idx] = 1.0
+        G_new[self.b, i_output_idx] = -1.0
         
-        # Control current constraint (short circuit)
-        G_new[x_idx, self.c] = -1.0
-        G_new[x_idx, self.d] = 1.0
+        # Control branch constraint: v_c - v_d = 0 (short circuit for measurement)
+        G_new[i_control_idx, self.c] = 1.0
+        G_new[i_control_idx, self.d] = -1.0
         
-        # Output voltage constraint: v_a - v_b = rm * i_y
-        G_new[y_idx, self.a] = -1.0
-        G_new[y_idx, self.b] = 1.0
-        G_new[y_idx, y_idx] = self.rm
+        # Output voltage constraint: v_a - v_b = rm * i_control
+        G_new[i_output_idx, self.a] = 1.0
+        G_new[i_output_idx, self.b] = -1.0
+        G_new[i_output_idx, i_control_idx] = -self.rm
         
         return G_new, I_new
 

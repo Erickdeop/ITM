@@ -44,8 +44,26 @@ def test_ccvs_stamp_basic():
     ccvs = CCVS(a=1, b=2, c=3, d=0, rm=1000.0)
     G_new, I_new = ccvs.stamp_dc(G, I)
     
+    # Check dimensions
     assert G_new.shape == (6, 6)
-    assert G_new[5, 5] == 1000.0
+    assert I_new.shape == (6,)
+    
+    # Check control current KCL stamps
+    assert G_new[3, 4] == 1.0   # Node c gets +i_control
+    assert G_new[0, 4] == -1.0  # Node d (0) gets -i_control
+    
+    # Check output current KCL stamps
+    assert G_new[1, 5] == 1.0   # Node a gets +i_output
+    assert G_new[2, 5] == -1.0  # Node b gets -i_output
+    
+    # Check control constraint equation (row 4): v_c - v_d = 0
+    assert G_new[4, 3] == 1.0   # +v_c
+    assert G_new[4, 0] == -1.0  # -v_d
+    
+    # Check output constraint equation (row 5): v_a - v_b - rm*i_control = 0
+    assert G_new[5, 1] == 1.0      # +v_a
+    assert G_new[5, 2] == -1.0     # -v_b
+    assert G_new[5, 4] == -1000.0  # -rm*i_control
 
 
 def test_controlled_sources_mna_flags():

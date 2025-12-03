@@ -19,9 +19,11 @@ def test_cccs_current_mirror():
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     
-    # F1 receive gain 5, so current should be 5mA
+    # Circuit: V1=1V, R1=1k (node 1 to 2), CCCS gain=5 (measures current at node 2), R2=1k at node 3
+    # i_control = 1mA, i_output = 5mA, V3 = 5V
     assert abs(result[1] - 1.0) < 1e-6
-    assert abs(result[2] - 5.0) < 1e-6
+    assert abs(result[2] - 0.0) < 1e-6  # Short circuit for current measurement
+    assert abs(result[3] - 5.0) < 1e-6
 
 
 def test_vccs_transconductance():
@@ -41,9 +43,11 @@ def test_ccvs_transresistance():
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     
-    # V1 should be close to 0 (short circuit for current measurement)
-    assert abs(result[1]) < 1e-6  # Short circuit
-    assert abs(result[2] - 1.0) < 1e-6
+    # Circuit: V1=1V, R1=1k (node 1 to 2), CCVS rm=1k (measures current at node 2, outputs to node 3)
+    # i_control = 1mA, V_out = rm * i_control = 1V
+    assert abs(result[1] - 1.0) < 1e-6
+    assert abs(result[2] - 0.0) < 1e-6  # Short circuit for current measurement
+    assert abs(result[3] - 1.0) < 1e-6
 
 
 def test_vcvs_inverting():

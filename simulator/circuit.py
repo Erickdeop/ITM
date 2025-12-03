@@ -1,16 +1,30 @@
 from __future__ import annotations
-import argparse
 import numpy as np
 
-from .parser import parse_netlist
+from dataclasses import dataclass, field
+from typing import List
+
 from .engine import solve_dc, solve_tran
 from .elements.base import TimeMethod
 
+@dataclass
+class TransientSettings:
+    enabled: bool = False   # [1]
+    t_stop: float = 0.0     # [2]
+    dt: float = 0.0         # [3]
+    method: str = "BE"      # [4] BE, FE or TRAP
+    intetnal_steps: int = 0 # [5] 
+    uic: bool = True        # [6] use initial conditions: Optional
+
+@dataclass
+class NetlistOOP:
+    elements: List[object]
+    max_node: int
+    transient: TransientSettings = field(default_factory=TransientSettings)
 
 class Circuit:
-    def __init__(self, netlist_path: str):
-        # Data holds the parsed netlist
-        self.data = parse_netlist(netlist_path)
+    def __init__(self, data: NetlistOOP):
+        self.data = data
 
     # ------------------------ DC ------------------------
     def run_dc(self, desired_nodes=None, nr_tol: float = 1e-8, v0_vector=None):

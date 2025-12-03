@@ -10,6 +10,7 @@ from .elements.current_source import CurrentSource
 from .elements.voltage_source import VoltageSource
 from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
+from .elements.controlled_sources import VCVS, CCCS, VCCS, CCVS
 
 @dataclass
 class TransientSettings:
@@ -215,8 +216,48 @@ def parse_netlist(path: str) -> NetlistOOP:
                 a = int(p[1]); b = int(p[2])
                 elems.append(Diode(a, b))
 
+            # ------------------- VCVS (E) -------------------
+            elif element_type == "E":
+                # Format: Exxx n+ n- nc+ nc- gain
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gain = float(p[5])
+                elems.append(VCVS(a, b, c, d, gain))
+
+            # ------------------- CCCS (F) -------------------
+            elif element_type == "F":
+                # Format: Fxxx n+ n- nc+ nc- gain
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gain = float(p[5])
+                elems.append(CCCS(a, b, c, d, gain))
+
+            # ------------------- VCCS (G) -------------------
+            elif element_type == "G":
+                # Format: Gxxx n+ n- nc+ nc- gm
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gm = float(p[5])  # transconductance
+                elems.append(VCCS(a, b, c, d, gm))
+
+            # ------------------- CCVS (H) -------------------
+            elif element_type == "H":
+                # Format: Hxxx n+ n- nc+ nc- rm
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                rm = float(p[5])  # transresistance
+                elems.append(CCVS(a, b, c, d, rm))
+
             # -----------------------------------------------------
-            # FUTUROS ELEMENTOS (diode, opamp, mosfet, etc)
+            # FUTUROS ELEMENTOS (opamp, mosfet, etc)
             # -----------------------------------------------------
             else:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")

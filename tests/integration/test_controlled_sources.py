@@ -5,7 +5,7 @@ from simulator.engine import solve_dc
 
 
 def test_vcvs_voltage_amplifier():
-    netlist = parse_netlist("circuits/vcvs_test.net")
+    netlist = parse_netlist("circuits/example_vcvs.net")
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     
@@ -15,7 +15,7 @@ def test_vcvs_voltage_amplifier():
 
 
 def test_cccs_current_mirror():
-    netlist = parse_netlist("circuits/cccs_test.net")
+    netlist = parse_netlist("circuits/example_cccs.net")
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     
@@ -26,7 +26,7 @@ def test_cccs_current_mirror():
 
 def test_vccs_transconductance():
     """Test VCCS circuit - transconductance amplifier"""
-    netlist = parse_netlist("circuits/vccs_test.net")
+    netlist = parse_netlist("circuits/example_vccs.net")
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     
@@ -37,7 +37,7 @@ def test_vccs_transconductance():
 
 def test_ccvs_transresistance():
     """Test CCVS circuit - transresistance amplifier"""
-    netlist = parse_netlist("circuits/ccvs_test.net")
+    netlist = parse_netlist("circuits/example_ccvs.net")
     v0 = np.zeros(netlist.max_node + 1)
     result = solve_dc(netlist, nr_tol=1e-6, v0_vector=v0, desired_nodes=None)
     

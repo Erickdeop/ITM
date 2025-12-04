@@ -4,7 +4,7 @@ from simulator.elements.base import TimeMethod
 import pytest
 
 def test_inductor_stamp_transient_backward_euler():
-    L = Inductor(1, 0, 1e-3)
+    L = Inductor("L1", 1, 0, 1e-3)
     G = np.zeros((2,2))
     I = np.zeros(2)
 
@@ -28,7 +28,7 @@ def test_inductor_be_initial_condition_current():
     when the state starts empty in Backward Euler method.
     """
     L_value = 1e-3
-    L = Inductor(1, 0, L_value, i0=0.02)  # starts inductor with ic=20 mA
+    L = Inductor("L1", 1, 0, L_value, i0=0.02)  # starts inductor with ic=20 mA
 
     G = np.zeros((2, 2))
     I = np.zeros(2)

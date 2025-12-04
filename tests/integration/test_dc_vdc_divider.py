@@ -1,8 +1,9 @@
 import pytest
 from simulator.circuit import Circuit
+from simulator.parser import parse_netlist
 
 def test_dc_vdc_divider_nodes():
-    c = Circuit('circuits/vdc_divider.net')
+    c = Circuit(parse_netlist('circuits/vdc_divider.net'))
     vals = c.run_dc([1,2])
     assert vals.shape == (2,)
     assert vals[0] == pytest.approx(10.0, rel=1e-6, abs=1e-6)

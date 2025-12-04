@@ -1,7 +1,7 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import List
 import numpy as np
+
+from .circuit import TransientSettings, NetlistOOP
 
 from .elements.resistor import Resistor
 from .elements.capacitor import Capacitor
@@ -12,30 +12,12 @@ from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
 from .elements.controlled_sources import VCVS, CCCS, VCCS, CCVS
 from .elements.ampop import OpAmp
-@dataclass
-class TransientSettings:
-    enabled: bool = False   # [1]
-    t_stop: float = 0.0     # [2]
-    dt: float = 0.0         # [3]
-    method: str = "BE"      # [4] BE, FE or TRAP
-    intetnal_steps: int = 0 # [5] 
-    uic: bool = True        # [6] use initial conditions: Optional
-
-@dataclass
-class NetlistOOP:
-    elements: List[object]
-    max_node: int
-    transient: TransientSettings = field(default_factory=TransientSettings)
-    has_nonlinear_elements: bool = False  # True if circuit contains nonlinear elements
-
 
 def _parse_ic_token(token: str) -> float:
     token = token.strip()
     if token.upper().startswith("IC="):
         token = token.split("=", 1)[1]
     return float(token)
-
-
 
 def parse_netlist(path: str) -> NetlistOOP:
     elems = []

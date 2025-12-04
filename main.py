@@ -267,7 +267,29 @@ def build_circuit() -> Tuple[Circuit, str]:
             
         # Add .sim file
         elif choice == "6":
-            print("\n==> ADICIONAR ARQUIVO .sim (À IMPLEMENTAR)")
+            print("\n==> ADICIONAR ARQUIVO .sim PARA COMPARAÇÃO GRÀFICA (TRAN)")
+
+            # Only transient
+            if not builder.transient.enabled:
+                print("\t\033[33mWarning:\033[0m Apenas simulações TRANSIENTES exibem gráfico no tempo.")
+                print("\tDefina a análise como TRAN em '5. Alterar configurações de simulação'.")
+                continue
+
+            path_str = input("\tInforme o caminho do arquivo .sim (ou Enter para cancelar):\n\t>> ").strip()
+            if not path_str:
+                print("\tOperação cancelada.")
+                continue
+
+            sim_path = Path(path_str)
+
+            # If exists
+            if not sim_path.is_file():
+                print(f"\t\033[33mWarning:\033[0m Arquivo .sim não encontrado: {sim_path}")
+                print("\tVerifique o caminho e tente novamente.")
+            else:
+                sim_file = str(sim_path)
+                print(f"\tArquivo .sim definido para comparação: {sim_file}")
+
         # Create .net file
         elif choice == "7":
             NETLIST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

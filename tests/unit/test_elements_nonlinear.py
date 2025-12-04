@@ -5,7 +5,7 @@ from simulator.elements.nonlinear_resistor import NonLinearResistor
 
 def test_diode_shockley_math():
 
-    d = Diode(1, 0, Is=3.7751345e-14, Vt=0.025)
+    d = Diode("D1", 1, 0, Is=3.7751345e-14, Vt=0.025)
     
     Vd = 0.7
 
@@ -23,7 +23,7 @@ def test_diode_shockley_math():
 
 def test_diode_clamp_safety():
 
-    d = Diode(1, 0)
+    d = Diode("D1", 1, 0)
     
     I_calc, G_calc = d._get_norton_equivalent(5.0)
     
@@ -41,7 +41,7 @@ def test_nonlinear_resistor_segment_selection():
     V_points = np.array([0., 1., 2., 4.])
     I_points = np.array([0., 1., 3., 4.])
     
-    nlr = NonLinearResistor(1, 0, V_points, I_points)
+    nlr = NonLinearResistor("N1", 1, 0, V_points, I_points)
     
     I_nr, G_eq = nlr._get_current_and_conductance(0.5)
     assert G_eq == 1.0

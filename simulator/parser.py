@@ -51,6 +51,7 @@ def parse_netlist(path: str) -> NetlistOOP:
 
             p = line.split()
             element_type = p[0][0].upper()
+            element_name = p[0]
             # ---------------- SET TRANSIENT -----------------
             if line.startswith("."):
                 if len(p) < 5:
@@ -68,19 +69,19 @@ def parse_netlist(path: str) -> NetlistOOP:
             # ------------------- RESISTOR -------------------
             elif element_type == "R":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
-                elems.append(Resistor(a, b, val))
+                elems.append(Resistor(element_name, a, b, val))
 
             # ------------------- CAPACITOR -------------------
             elif element_type == "C":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
                 ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
-                elems.append(Capacitor(a, b, val, ic))
+                elems.append(Capacitor(element_name, a, b, val, ic))
 
             # ------------------- INDUCTOR -------------------
             elif element_type == "L":
                 a = int(p[1]); b = int(p[2]); val = float(p[3])
                 ic = _parse_ic_token(p[4]) if len(p) > 4 else 0.0
-                elems.append(Inductor(a, b, val, ic))
+                elems.append(Inductor(element_name, a, b, val, ic))
 
             # ------------------- CURRENT SOURCE -------------------
             elif element_type == "I":
@@ -89,7 +90,7 @@ def parse_netlist(path: str) -> NetlistOOP:
 
                 if stype == "DC":
                     dc = float(p[4])
-                    elems.append(CurrentSource(a, b, dc=dc, is_ac=False))
+                    elems.append(CurrentSource(element_name, a, b, dc=dc, is_ac=False))
 
                 elif stype == "AC":
                     dc = float(p[4]) if len(p) > 4 else 0.0
@@ -98,7 +99,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     phase = float(p[7]) if len(p) > 7 else 0.0
 
                     elems.append(CurrentSource(
-                        a, b,
+                        element_name, a, b,
                         dc=dc, amp=amp, freq=freq,
                         phase_deg=phase, is_ac=True
                     ))
@@ -112,7 +113,8 @@ def parse_netlist(path: str) -> NetlistOOP:
 
                 if stype == "DC":
                     dc = float(p[4])
-                    elems.append(VoltageSource(a, b, dc=dc, is_ac=False, source_type="DC"))
+                    elems.append(VoltageSource(element_name, a, b, 
+                                               dc=dc, is_ac=False, source_type="DC"))
 
                 elif stype == "AC":
                     dc = float(p[4]) if len(p) > 4 else 0.0
@@ -121,7 +123,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     phase = float(p[7]) if len(p) > 7 else 0.0
 
                     elems.append(VoltageSource(
-                        a, b,
+                        element_name, a, b,
                         dc=dc, amp=amp, freq=freq,
                         phase_deg=phase, is_ac=True, source_type="AC"
                     ))
@@ -144,7 +146,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     }
                     
                     elems.append(VoltageSource(
-                        a, b,
+                        element_name, a, b,
                         dc=offset,  # DC analysis
                         source_type="SIN",
                         sin_params=sin_params
@@ -170,7 +172,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     }
                     
                     elems.append(VoltageSource(
-                        a, b,
+                        element_name, a, b,
                         dc=v1,  # DC analysis
                         source_type="PULSE",
                         pulse_params=pulse_params
@@ -188,7 +190,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 V3 = float(p[7]); I3 = float(p[8])
                 V4 = float(p[9]); I4 = float(p[10])
                 elems.append(NonLinearResistor(
-                    a, b, 
+                    element_name, a, b, 
                     np.array([V1, V2, V3, V4]), 
                     np.array([I1, I2, I3, I4])
                     ))
@@ -197,7 +199,7 @@ def parse_netlist(path: str) -> NetlistOOP:
             elif element_type == "D":
                 # Format: Dxxx a b
                 a = int(p[1]); b = int(p[2])
-                elems.append(Diode(a, b))
+                elems.append(Diode(element_name, a, b))
 
             # ------------------- VCVS (E) -------------------
             elif element_type == "E":
@@ -207,7 +209,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 c = int(p[3])     # control positive
                 d = int(p[4])     # control negative
                 gain = float(p[5])
-                elems.append(VCVS(a, b, c, d, gain))
+                elems.append(VCVS(element_name, a, b, c, d, gain))
 
             # ------------------- CCCS (F) -------------------
             elif element_type == "F":
@@ -217,7 +219,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 c = int(p[3])     # control positive
                 d = int(p[4])     # control negative
                 gain = float(p[5])
-                elems.append(CCCS(a, b, c, d, gain))
+                elems.append(CCCS(element_name, a, b, c, d, gain))
 
             # ------------------- VCCS (G) -------------------
             elif element_type == "G":
@@ -227,7 +229,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 c = int(p[3])     # control positive
                 d = int(p[4])     # control negative
                 gm = float(p[5])  # transconductance
-                elems.append(VCCS(a, b, c, d, gm))
+                elems.append(VCCS(element_name, a, b, c, d, gm))
 
             # ------------------- CCVS (H) -------------------
             elif element_type == "H":
@@ -237,7 +239,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 c = int(p[3])     # control positive
                 d = int(p[4])     # control negative
                 rm = float(p[5])  # transresistance
-                elems.append(CCVS(a, b, c, d, rm))
+                elems.append(CCVS(element_name, a, b, c, d, rm))
 
              # ------------------- OPAMP (O) -------------------
             elif element_type == "O":
@@ -257,6 +259,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                 # single-ended com saída referenciada ao terra (0).
                 elems.append(
                     OpAmp(
+                        element_name, 
                         a=vo,      # saída +
                         b=0,       # saída - presa no GND
                         c=vp,      # entrada +
@@ -274,8 +277,6 @@ def parse_netlist(path: str) -> NetlistOOP:
     has_nonlinear = any(getattr(elem, 'is_nonlinear', False) for elem in elems)
     
     nl = NetlistOOP(elems, maxnode, ts, has_nonlinear)
-    nl.netlist_path = path  
-    print(nl)
     if has_nonlinear:
         print("Circuit contains NONLINEAR elements - Newton-Raphson will be used")
     else:

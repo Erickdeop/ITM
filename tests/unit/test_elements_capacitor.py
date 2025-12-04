@@ -4,7 +4,7 @@ from simulator.elements.base import TimeMethod
 
 def test_capacitor_be_stamp():
     G = np.zeros((3,3)); I = np.zeros(3)
-    c = Capacitor(1, 2, 1e-6)
+    c = Capacitor("C1", 1, 2, 1e-6)
     G2, I2, _ = c.stamp_transient(G.copy(), I.copy(), {}, t=0.0, dt=1e-3, method=TimeMethod.BACKWARD_EULER)
     Gc = 1e-6/1e-3
     assert G2[1,1] == pytest.approx(Gc)
@@ -14,7 +14,7 @@ def test_capacitor_be_stamp():
 
 def test_capacitor_trap_stamp():
     G = np.zeros((3,3)); I = np.zeros(3)
-    c = Capacitor(1, 2, 1e-6)
+    c = Capacitor("C1", 1, 2, 1e-6)
     state = {'v_prev': 0.25, 'i_prev': 1e-3}
     G2, I2, _ = c.stamp_transient(G.copy(), I.copy(), state, t=0.0, dt=1e-3, method=TimeMethod.TRAPEZOIDAL)
     Gc = 2*1e-6/1e-3
@@ -34,7 +34,7 @@ def test_capacitor_be_initial_condition_voltage():
     G = np.zeros((3, 3))
     I = np.zeros(3)
 
-    c = Capacitor(1, 2, 1e-6, v0=5.0)
+    c = Capacitor("C1", 1, 2, 1e-6, v0=5.0)
 
     G2, I2, _ = c.stamp_transient(
         G.copy(),

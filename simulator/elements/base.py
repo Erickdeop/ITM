@@ -12,6 +12,7 @@ class TimeMethod(Enum):
 @dataclass
 class Element:
     is_mna: ClassVar[bool] = False # Tells if the element adds MNA variables (new lines in matrix and vector)
+    is_nonlinear: ClassVar[bool] = False # Tells if the element is nonlinear (requires Newton-Raphson)
 
     def max_node(self) -> int:
         raise NotImplementedError

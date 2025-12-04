@@ -10,14 +10,14 @@ from .elements.current_source import CurrentSource
 from .elements.voltage_source import VoltageSource
 from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
+from .elements.controlled_sources import VCVS, CCCS, VCCS, CCVS
+from .elements.ampop import OpAmp
 
 def _parse_ic_token(token: str) -> float:
     token = token.strip()
     if token.upper().startswith("IC="):
         token = token.split("=", 1)[1]
     return float(token)
-
-
 
 def parse_netlist(path: str) -> NetlistOOP:
     elems = []
@@ -199,14 +199,86 @@ def parse_netlist(path: str) -> NetlistOOP:
                 a = int(p[1]); b = int(p[2])
                 elems.append(Diode(a, b))
 
+            # ------------------- VCVS (E) -------------------
+            elif element_type == "E":
+                # Format: Exxx n+ n- nc+ nc- gain
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gain = float(p[5])
+                elems.append(VCVS(a, b, c, d, gain))
+
+            # ------------------- CCCS (F) -------------------
+            elif element_type == "F":
+                # Format: Fxxx n+ n- nc+ nc- gain
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gain = float(p[5])
+                elems.append(CCCS(a, b, c, d, gain))
+
+            # ------------------- VCCS (G) -------------------
+            elif element_type == "G":
+                # Format: Gxxx n+ n- nc+ nc- gm
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                gm = float(p[5])  # transconductance
+                elems.append(VCCS(a, b, c, d, gm))
+
+            # ------------------- CCVS (H) -------------------
+            elif element_type == "H":
+                # Format: Hxxx n+ n- nc+ nc- rm
+                a = int(p[1])     # output positive
+                b = int(p[2])     # output negative
+                c = int(p[3])     # control positive
+                d = int(p[4])     # control negative
+                rm = float(p[5])  # transresistance
+                elems.append(CCVS(a, b, c, d, rm))
+
+             # ------------------- OPAMP (O) -------------------
+            elif element_type == "O":
+                if len(p) < 4:
+                    raise ValueError(
+                        f"\033[31mInvalid Format:\33[0m "
+                        f"Opamp ideal requer: Oxxxx vp vn vo. Recebido: {p}"
+                    )
+
+                vp = int(p[1])   # nó de controle positivo (v+)
+                vn = int(p[2])   # nó de controle negativo (v-)
+                vo = int(p[3])   # nó de saída
+
+                gain = 1e5  # ganho bem alto (opamp ideal)
+
+                # Usando nossa classe OpAmp como VCVS de ganho alto,
+                # single-ended com saída referenciada ao terra (0).
+                elems.append(
+                    OpAmp(
+                        a=vo,      # saída +
+                        b=0,       # saída - presa no GND
+                        c=vp,      # entrada +
+                        d=vn,      # entrada -
+                        gain=gain,
+                    )
+                )
             # -----------------------------------------------------
-            # FUTUROS ELEMENTOS (diode, opamp, mosfet, etc)
+            # FUTUROS ELEMENTOS (opamp, mosfet, etc)
             # -----------------------------------------------------
             else:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
-    nl = NetlistOOP(elems, maxnode, ts)
-    nl.netlist_path = path   # type: ignore    
-    print (nl)       
-    return nl             
+    # Detect if circuit has nonlinear elements
+    has_nonlinear = any(getattr(elem, 'is_nonlinear', False) for elem in elems)
+    
+    nl = NetlistOOP(elems, maxnode, ts, has_nonlinear)
+    nl.netlist_path = path  
+    print(nl)
+    if has_nonlinear:
+        print("Circuit contains NONLINEAR elements - Newton-Raphson will be used")
+    else:
+        print("Circuit contains only LINEAR elements - Direct solve will be used")
+    return nl
 

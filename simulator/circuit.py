@@ -21,6 +21,7 @@ class NetlistOOP:
     elements: List[object]
     max_node: int
     transient: TransientSettings = field(default_factory=TransientSettings)
+    has_nonlinear_elements: bool = False  # True if circuit contains nonlinear elements
 
 class Circuit:
     def __init__(self, data: NetlistOOP):

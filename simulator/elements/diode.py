@@ -4,6 +4,7 @@ from typing import Tuple, Optional
 import numpy as np
 
 from .base import Element
+from typing import ClassVar
 
 @dataclass
 class Diode(Element):
@@ -12,6 +13,7 @@ class Diode(Element):
     # Standard diode parameters
     Is: float = 3.7751345e-14  # Saturation Current
     Vt: float = 0.025          # Termic tension (25mV)
+    is_nonlinear: ClassVar[bool] = True  # Diode is nonlinear
 
     def max_node(self) -> int:
         return max(self.a, self.b)

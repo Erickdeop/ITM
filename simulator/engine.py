@@ -1,5 +1,6 @@
 from __future__ import annotations
 import numpy as np
+from scipy import linalg
 from .elements.base import TimeMethod
 from .newton import newton_solve
 from typing import Tuple, Optional, List, Dict, Any
@@ -11,13 +12,23 @@ def get_total_variables(data):
     """
     Calculates the total number of variables in the MNA system
     (max_node + 1) + (extra MNA variables).
+    
+    Note: Most MNA elements add 1 variable, but CCVS adds 2 variables.
     """
     n_nodes = data.max_node + 1
     n_extra = 0
     
     for elem in data.elements:
         if elem.is_mna:
-            n_extra += 1
+            # Check if this element adds more than 1 MNA variable
+            if hasattr(elem, 'mna_variables'):
+                n_extra += elem.mna_variables()
+            elif elem.__class__.__name__ == 'CCVS':
+                # CCVS adds 2 variables (control current + output current)
+                n_extra += 2
+            else:
+                # Most elements (VoltageSource, VCVS, CCCS) add 1 variable
+                n_extra += 1
             
     return n_nodes + n_extra
 
@@ -78,39 +89,56 @@ def _build_mna_system(
 # ============================================================
 def solve_dc(data, nr_tol, v0_vector, desired_nodes):
     """
-    Solve DC analysis. 
-    Uses Newton-Raphson because of non linear elements.
+    Solve DC analysis.
+
+    Uses Newton-Raphson because of non linear elements only if needed:
+    - LINEAR circuit: Uses direct solve (faster, single matrix inversion)
+    - NONLINEAR circuit: Uses Newton-Raphson iteration
     """
     # Get system total size, including extra MNA variables
     n_total = get_total_variables(data)
-    
-    # Build MNA system function with given guess. 
-    def build_mna(x_guess_red: np.ndarray):
-        return _build_mna_system(
-            data, 
-            x_guess_red, 
-            analysis_context="DC" 
-            # t, dt, method, states = None
-        )
     
     # Define initial guess.
     if v0_vector is not None and len(v0_vector) == n_total:
          x0_red = v0_vector[1:].copy()
     else:
          x0_red = np.zeros(n_total - 1)
-
-    # Calls Newton-Raphson solver
-    try:
-        x_red = newton_solve(build_mna, x0_red, tol=nr_tol)
-    except Exception as e:
-        raise RuntimeError(f"NR falhou na análise DC: {e}")
+    
+    # Check if circuit has nonlinear elements
+    if data.has_nonlinear_elements:
+        # NONLINEAR
+        print("[DC Analysis] Using Newton-Raphson (nonlinear circuit)")
+        
+        def build_mna(x_guess_red: np.ndarray):
+            return _build_mna_system(
+                data, 
+                x_guess_red, 
+                analysis_context="DC"
+            )
+        
+        try:
+            x_red = newton_solve(build_mna, x0_red, tol=nr_tol)
+        except Exception as e:
+            raise RuntimeError(f"NR falhou na análise DC: {e}")
+    else:
+        # LINEAR
+        print("[DC Analysis] Using direct solve (linear circuit)")
+        
+        try:
+            G, I = _build_mna_system(data, x0_red, analysis_context="DC")
+            x_red = linalg.solve(G, I)
+        except Exception as e:
+            raise RuntimeError(f"Solução direta falhou na análise DC: {e}")
 
     # Reconstruct full x with node 0
     x = np.concatenate(([0.0], x_red))
 
     # TODO: Every node should be a desired node?
     # If so, we can return the full x vector
-    return np.array([x[node] for node in desired_nodes])
+    if desired_nodes is not None:
+        return np.array([x[node] for node in desired_nodes])
+    else:
+        return x
 
 # ============================================================
 #              TRANSIENT SOLVER (NR + BE/TRAP/FE)

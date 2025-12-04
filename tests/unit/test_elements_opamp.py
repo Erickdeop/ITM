@@ -1,5 +1,5 @@
 import numpy as np
-from simulator.elements.opamp import OpAmp
+from simulator.elements.ampop import OpAmp
 
 
 def test_opamp_augments_mna():

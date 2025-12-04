@@ -1,6 +1,6 @@
 import numpy as np
 from simulator.parser import parse_netlist
-from simulator.elements.opamp import OpAmp
+from simulator.elements.ampop import OpAmp
 from simulator.engine import solve_dc
 
 

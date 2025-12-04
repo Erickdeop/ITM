@@ -263,8 +263,15 @@ def parse_netlist(path: str) -> NetlistOOP:
             else:
                 raise ValueError(f"\033[31mNo Matching Element:\33[0m Elemento não reconhecido: {p}")
 
-    nl = NetlistOOP(elems, maxnode, ts)
+    # Detect if circuit has nonlinear elements
+    has_nonlinear = any(getattr(elem, 'is_nonlinear', False) for elem in elems)
+    
+    nl = NetlistOOP(elems, maxnode, ts, has_nonlinear)
     nl.netlist_path = path  
-    print(nl)               
-    return nl             
+    print(nl)
+    if has_nonlinear:
+        print("Circuit contains NONLINEAR elements - Newton-Raphson will be used")
+    else:
+        print("Circuit contains only LINEAR elements - Direct solve will be used")
+    return nl
 

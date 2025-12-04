@@ -28,7 +28,20 @@ class Circuit:
         self.data = data
 
     # ------------------------ DC ------------------------
-    def run_dc(self, desired_nodes=None, nr_tol: float = 1e-8, v0_vector=None):
+    def run_dc(self, desired_nodes=None, nr_tol: float = 1e-8, v0_vector=None,
+               max_nr_iter: int = 50, max_nr_guesses: int = 100):
+        """        
+        desired_nodes : List[int], optional
+            Nodes to include in output
+        nr_tol : float
+            Newton-Raphson tolerance (default: 1e-8)
+        v0_vector : np.ndarray, optional
+            Initial voltage vector
+        max_nr_iter : int
+            Maximum NR iterations per guess (N, typically 20-50)
+        max_nr_guesses : int
+            Maximum number of random guess attempts (M, typically 100)
+        """
         n = self.data.max_node + 1
         
         if desired_nodes is None:
@@ -41,7 +54,9 @@ class Circuit:
             self.data,
             nr_tol,
             v0_vector,
-            desired_nodes
+            desired_nodes,
+            max_nr_iter,
+            max_nr_guesses
         )
 
     # --------------------- TRANSIENT ---------------------
@@ -49,8 +64,22 @@ class Circuit:
         self,
         desired_nodes=None,
         nr_tol: float = 1e-8,
-        v0_vector=None
+        v0_vector=None,
+        max_nr_iter: int = 50,
+        max_nr_guesses: int = 100
     ):
+        """
+        desired_nodes : List[int], optional
+            Nodes to include in output
+        nr_tol : float
+            Newton-Raphson tolerance (default: 1e-8)
+        v0_vector : np.ndarray, optional
+            Initial voltage vector
+        max_nr_iter : int
+            Maximum NR iterations per guess (N, typically 20-50)
+        max_nr_guesses : int
+            Maximum number of random guess attempts (M, typically 100)
+        """
         ts = self.data.transient
         if not ts.enabled:
             raise RuntimeError(
@@ -80,6 +109,8 @@ class Circuit:
             v0_vector,
             desired_nodes,
             method,
+            max_nr_iter,
+            max_nr_guesses
         )
     
     def print(self):

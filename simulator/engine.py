@@ -87,13 +87,29 @@ def _build_mna_system(
 # ============================================================
 #                      DC SOLVER
 # ============================================================
-def solve_dc(data, nr_tol, v0_vector, desired_nodes):
+def solve_dc(data, nr_tol, v0_vector, desired_nodes, 
+             max_nr_iter: int = 50, max_nr_guesses: int = 100):
     """
     Solve DC analysis.
 
     Uses Newton-Raphson because of non linear elements only if needed:
     - LINEAR circuit: Uses direct solve (faster, single matrix inversion)
     - NONLINEAR circuit: Uses Newton-Raphson iteration
+    
+    Parameters:
+    -----------
+    data : ParsedNetlist
+        Parsed circuit netlist
+    nr_tol : float
+        Newton-Raphson tolerance
+    v0_vector : Optional[np.ndarray]
+        Initial voltage vector
+    desired_nodes : List[int]
+        Nodes to return in output
+    max_nr_iter : int
+        Maximum NR iterations per guess (N, typically 20-50)
+    max_nr_guesses : int
+        Maximum number of random guess attempts (M, typically 100)
     """
     # Get system total size, including extra MNA variables
     n_total = get_total_variables(data)
@@ -117,7 +133,8 @@ def solve_dc(data, nr_tol, v0_vector, desired_nodes):
             )
         
         try:
-            x_red = newton_solve(build_mna, x0_red, tol=nr_tol)
+            x_red = newton_solve(build_mna, x0_red, tol=nr_tol, 
+                                max_iter=max_nr_iter, max_guesses=max_nr_guesses)
         except Exception as e:
             raise RuntimeError(f"NR falhou na análise DC: {e}")
     else:
@@ -143,10 +160,32 @@ def solve_dc(data, nr_tol, v0_vector, desired_nodes):
 # ============================================================
 #              TRANSIENT SOLVER (NR + BE/TRAP/FE)
 # ============================================================
-def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
+def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method,
+               max_nr_iter: int = 50, max_nr_guesses: int = 100):
     """
     Solve transient (over time) analysis.
     Uses Newton-Raphson.
+    
+    Parameters:
+    -----------
+    data : ParsedNetlist
+        Parsed circuit netlist
+    total_time : float
+        Total simulation time
+    dt : float
+        Time step
+    nr_tol : float
+        Newton-Raphson tolerance
+    v0_vector : Optional[np.ndarray]
+        Initial voltage vector
+    desired_nodes : List[int]
+        Nodes to return in output
+    method : TimeMethod
+        Integration method (BE, FE, TRAP)
+    max_nr_iter : int
+        Maximum NR iterations per guess (N, typically 20-50)
+    max_nr_guesses : int
+        Maximum number of random guess attempts (M, typically 100)
     """
 
     steps = int(total_time / dt) + 1
@@ -193,7 +232,8 @@ def solve_tran(data, total_time, dt, nr_tol, v0_vector, desired_nodes, method):
         # Passamos o chute inicial reduzido (sem o nó 0)
         # x_prev tem tamanho n_total. x_prev[1:] tem tamanho n_total-1.
         try:
-            x_red = newton_solve(build_mna, x_prev[1:], tol=nr_tol)
+            x_red = newton_solve(build_mna, x_prev[1:], tol=nr_tol,
+                                max_iter=max_nr_iter, max_guesses=max_nr_guesses)
         except Exception as e:
             raise RuntimeError(f"NR não convergiu em t={t:.5f}s na analise transiente."
                                "\nErro: {e}")

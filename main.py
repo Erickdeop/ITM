@@ -1,9 +1,11 @@
 import argparse
+from typing import Tuple
+from pathlib import Path
+
 from simulator.parser import parse_netlist
 from simulator.circuit import Circuit
 from simulator.builder import CircuitBuilder
-from typing import Tuple
-from pathlib import Path
+from plot import find_sim_file, load_sim_file, plot_all 
 
 NETLIST_OUTPUT_DIR = Path("./created_net_files")
 
@@ -333,10 +335,12 @@ def _cli():
 
     # Built or open existing circuit
     if args.netlist is None:
-        circuit, _ = build_circuit()
+        circuit, sim_file = build_circuit()
     else:
         netlist = parse_netlist(args.netlist)
         circuit = Circuit(netlist)
+        if args.guide:
+            sim_file = args.guide
 
     if __debug__:
         circuit.print()
@@ -348,23 +352,39 @@ def _cli():
             nr_tol=args.nr_tol,
         )
 
-        print("\n==> CIRCUIT TRANSIENT ANALYSIS RESULTS")
+        print("\n==> TRANSIENT CIRCUIT ANALYSIS RESULTS")
         print("Transient points:", len(t))
+        if args.nodes is None:
+            node_ids = list(range(out.shape[0]))
+        else:
+            node_ids = args.nodes
+
         for i in range(out.shape[0]):
-            if args.nodes is None:
-                node = i
-            else: 
-                node = args.nodes[i]
+            node = node_ids[i]
             print(f"\n- Node {node} first results:", out[i, :10].tolist())
             print(f"- Node {node} last results:", out[i, -10:].tolist())
 
-        ''' SAVE .SIM FILE
-        if args.create_sim:
-            sim_path = args.netlist.rsplit(".", 1)[0] + ".sim"
-            from simulator.simfile import save_sim_file
-            save_sim_file(sim_path, t, {f"Node_{node}": out[i] for i, node in enumerate(args.nodes or range(out.shape[0]))})
-            print(f".SIM file saved to: {sim_path}")
-            '''
+        # ------------------ PLOTTING ---------------------
+        # ----------------- Dict for plot -----------------
+        py_vars = {
+            f"Node_{node_ids[i]}": out[i]
+            for i in range(out.shape[0])
+        }
+
+        # ---------- Choose correct .sim file --------------
+        sim_time = None
+        sim_vars = None
+
+        try:
+            sim_file
+        except:
+            sim_file = find_sim_file(args.netlist)
+
+        if sim_file:
+            sim_time, sim_vars = load_sim_file(sim_file)
+
+        # ----------------- Call plot -----------------
+        plot_all(t, py_vars, sim_time, sim_vars)
         
     else: # data.transient.enabled = false
         print("CIRCUIT DC ANALYSIS RESULTS")

@@ -26,6 +26,7 @@ class NetlistOOP:
     elements: List[object]
     max_node: int
     transient: TransientSettings = field(default_factory=TransientSettings)
+    has_nonlinear_elements: bool = False  # True if circuit contains nonlinear elements
 
 
 def _parse_ic_token(token: str) -> float:

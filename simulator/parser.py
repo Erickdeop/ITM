@@ -11,7 +11,7 @@ from .elements.voltage_source import VoltageSource
 from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
 from .elements.controlled_sources import VCVS, CCCS, VCCS, CCVS
-
+from .elements.ampop import OpAmp
 @dataclass
 class TransientSettings:
     enabled: bool = False   # [1]
@@ -256,6 +256,31 @@ def parse_netlist(path: str) -> NetlistOOP:
                 rm = float(p[5])  # transresistance
                 elems.append(CCVS(a, b, c, d, rm))
 
+             # ------------------- OPAMP (O) -------------------
+            elif element_type == "O":
+                if len(p) < 4:
+                    raise ValueError(
+                        f"\033[31mInvalid Format:\33[0m "
+                        f"Opamp ideal requer: Oxxxx vp vn vo. Recebido: {p}"
+                    )
+
+                vp = int(p[1])   # nó de controle positivo (v+)
+                vn = int(p[2])   # nó de controle negativo (v-)
+                vo = int(p[3])   # nó de saída
+
+                gain = 1e5  # ganho bem alto (opamp ideal)
+
+                # Usando nossa classe OpAmp como VCVS de ganho alto,
+                # single-ended com saída referenciada ao terra (0).
+                elems.append(
+                    OpAmp(
+                        a=vo,      # saída +
+                        b=0,       # saída - presa no GND
+                        c=vp,      # entrada +
+                        d=vn,      # entrada -
+                        gain=gain,
+                    )
+                )
             # -----------------------------------------------------
             # FUTUROS ELEMENTOS (opamp, mosfet, etc)
             # -----------------------------------------------------

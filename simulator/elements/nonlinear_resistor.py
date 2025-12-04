@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, ClassVar
 import numpy as np
 
 from .base import Element 
@@ -10,6 +10,7 @@ class NonLinearResistor(Element):
     b: int
     V_points: np.ndarray 
     I_points: np.ndarray
+    is_nonlinear: ClassVar[bool] = True  # NonLinearResistor is nonlinear
 
     def max_node(self) -> int:  
         return max(self.a, self.b)

@@ -23,6 +23,11 @@ def add_component (builder: CircuitBuilder):
     print("\tV: Fonte de tensão")
     print("\tN: Resistor não-linear")
     print("\tD: Diodo")
+    print("\tE: Fonte VCVS (tensão controlada por tensão)")
+    print("\tF: Fonte CCCS (corrente controlada por corrente)")
+    print("\tG: Fonte VCCS (corrente controlada por tensão)")
+    print("\tH: Fonte CCVS (tensão controlada por corrente)")
+    print("\tO: Amplificador operacional ideal")
     ctype = input("Escolha um componente:\n>> ").strip().upper()
 
     # ---------------------- LINEAR ELEMENTS ----------------------
@@ -115,6 +120,58 @@ def add_component (builder: CircuitBuilder):
             print("\tFonte de tensão PULSE adicionada com sucesso.")
         else:
             print("\033[31mTipo de fonte de tensão não reconhecido.\033[0m")
+            
+    # ---------------------- CONTROLLED SOURCES ----------------------
+    elif ctype == "E":
+        print("\n==> Fonte VCVS (E): tensão controlada por tensão")
+        a = int(input("\tNó de saída +: "))
+        b = int(input("\tNó de saída -: "))
+        c = int(input("\tNó de controle +: "))
+        d = int(input("\tNó de controle -: "))
+        gain = float(input("\tGanho (Vout / Vctrl): "))
+        builder.add_vcvs(a, b, c, d, gain)
+        print("\tVCVS adicionada com sucesso.")
+
+    elif ctype == "F":
+        print("\n==> Fonte CCCS (F): corrente controlada por corrente")
+        a = int(input("\tNó de saída +: "))
+        b = int(input("\tNó de saída -: "))
+        c = int(input("\tNó do ramo de controle +: "))
+        d = int(input("\tNó do ramo de controle -: "))
+        gain = float(input("\tGanho (Iout / Ictrl): "))
+        builder.add_cccs(a, b, c, d, gain)
+        print("\tCCCS adicionada com sucesso.")
+
+    elif ctype == "G":
+        print("\n==> Fonte VCCS (G): corrente controlada por tensão")
+        a = int(input("\tNó de saída +: "))
+        b = int(input("\tNó de saída -: "))
+        c = int(input("\tNó de controle +: "))
+        d = int(input("\tNó de controle -: "))
+        gm = float(input("\tTranscondutância gm [A/V]: "))
+        builder.add_vccs(a, b, c, d, gm)
+        print("\tVCCS adicionada com sucesso.")
+
+    elif ctype == "H":
+        print("\n==> Fonte CCVS (H): tensão controlada por corrente")
+        a = int(input("\tNó de saída +: "))
+        b = int(input("\tNó de saída -: "))
+        c = int(input("\tNó do ramo de controle +: "))
+        d = int(input("\tNó do ramo de controle -: "))
+        rm = float(input("\tTransresistência rm [V/A]: "))
+        builder.add_ccvs(a, b, c, d, rm)
+        print("\tCCVS adicionada com sucesso.")
+
+    # ------------------------- AmpOp -----------------------
+    elif ctype == "O":
+        print("\n==> Amplificador operacional ideal (O)")
+        vp = int(input("\tNó de entrada não-inversora (+): "))
+        vn = int(input("\tNó de entrada inversora (-): "))
+        vo = int(input("\tNó de saída: "))
+        gain_str = input("\tGanho (padrão = 1e5, Enter para padrão): ").strip()
+        gain = float(gain_str) if gain_str else 1e5
+        builder.add_opamp(vp, vn, vo, gain)
+        print("\tAmplificador operacional ideal adicionado com sucesso.")
 
     # ---------------------- NON LINEAR ELEMENTS ----------------------
     elif ctype == "N":
@@ -376,7 +433,7 @@ def _cli():
         sim_vars = None
 
         try:
-            sim_file
+            sim_file # type: ignore
         except:
             sim_file = find_sim_file(args.netlist)
 

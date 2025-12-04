@@ -14,6 +14,8 @@ from .elements.current_source import CurrentSource
 from .elements.voltage_source import VoltageSource
 from .elements.nonlinear_resistor import NonLinearResistor
 from .elements.diode import Diode
+from .elements.controlled_sources import VCVS, CCCS, VCCS, CCVS
+from .elements.ampop import OpAmp
 
 from pathlib import Path
 
@@ -175,6 +177,42 @@ class CircuitBuilder:
             )
         )
         self._update_max_node(a, b)
+
+    # ----------------- Controlled Sources -----------------
+    def add_vcvs(self, a: int, b: int, c: int, d: int, gain: float):
+        """VCVS: E <n+> <n-> <nc+> <nc-> <gain>"""
+        self.elements.append(VCVS(a, b, c, d, gain))
+        self._update_max_node(a, b, c, d)
+
+    def add_cccs(self, a: int, b: int, c: int, d: int, gain: float):
+        """CCCS: F <n+> <n-> <nc+> <nc-> <gain>"""
+        self.elements.append(CCCS(a, b, c, d, gain))
+        self._update_max_node(a, b, c, d)
+
+    def add_vccs(self, a: int, b: int, c: int, d: int, gm: float):
+        """VCCS: G <n+> <n-> <nc+> <nc-> <gm>"""
+        self.elements.append(VCCS(a, b, c, d, gm))
+        self._update_max_node(a, b, c, d)
+
+    def add_ccvs(self, a: int, b: int, c: int, d: int, rm: float):
+        """CCVS: H <n+> <n-> <nc+> <nc-> <rm>"""
+        self.elements.append(CCVS(a, b, c, d, rm))
+        self._update_max_node(a, b, c, d)
+
+    # ------------------------- AmpOp -----------------------
+    def add_opamp(self, vp: int, vn: int, vo: int, gain: float = 1e5):
+        """OpAmp ideal: O <vp> <vn> <vo> [gain]"""
+        self.elements.append(
+            OpAmp(
+                a=vo,   # Out +
+                b=0,    # Out -
+                c=vp,   # In +
+                d=vn,   # In -
+                gain=gain,
+            )
+        )
+        self._update_max_node(vp, vn, vo)
+
 
     # ----------------- Non Linear Elements -----------------
     def add_nonlinear_resistor(

@@ -3,6 +3,9 @@ from simulator.parser import parse_netlist
 from simulator.circuit import Circuit
 from simulator.builder import CircuitBuilder
 from typing import Tuple
+from pathlib import Path
+
+NETLIST_OUTPUT_DIR = Path("./created_net_files")
 
 # ------------------------------------------------#
 #             ADD COMPONENT TO CIRCUIT            #
@@ -185,7 +188,34 @@ def build_circuit() -> Tuple[Circuit, str]:
                 print(f"\033[31mErro inesperado:\033[0m {e}")
         # Remove component
         elif choice == "3":
-            print("\n==> REMOVER COMPONENTE (À IMPLEMENTAR)")
+            print(f"\n==> REMOVER COMPONENTE DE {builder.name}")
+
+            if not builder.elements:
+                print("\tNenhum componente para remover.")
+                continue
+
+            for idx, elem in enumerate(builder.elements, start=1):
+                print(f"\t{idx}. {elem}")
+
+            sel = input(
+                "\tDigite o número do componente a remover (ou Enter para cancelar): "
+            ).strip()
+
+            if not sel:
+                print("\tRemoção cancelada.")
+                continue
+
+            try:
+                idx = int(sel)
+            except ValueError:
+                print("\tEntrada inválida. Nenhum componente foi removido.")
+                continue
+
+            if builder.remove_component(idx):
+                print("\tComponente removido com sucesso.")
+            else:
+                print("\tÍndice inválido. Nenhum componente foi removido.")
+
         # View components
         elif choice == "4":
             print(f"\n==> COMPONENTES DE {builder.name}:")
@@ -240,7 +270,18 @@ def build_circuit() -> Tuple[Circuit, str]:
             print("\n==> ADICIONAR ARQUIVO .sim (À IMPLEMENTAR)")
         # Create .net file
         elif choice == "7":
-            print("\n==> SALVAR NETLIST EM ARQUIVO .net (À IMPLEMENTAR)")
+            NETLIST_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+            # Nome de arquivo = nome_do_circuito.net
+            filename = (builder.name or "circuito").replace(" ", "_")
+            net_path = NETLIST_OUTPUT_DIR / f"{filename}.net"
+
+            try:
+                builder.save_netlist(str(net_path))
+                print(f"\nNetlist salva em: {net_path}")
+            except Exception as e:
+                print("\033[31mErro ao salvar netlist\033[0m:", e)
+
         # Exit and run
         elif choice == "8":
             new_circuit = builder.to_netlist_oop()

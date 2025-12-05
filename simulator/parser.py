@@ -122,7 +122,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     }
                     
                     elems.append(CurrentSource(
-                        a, b,
+                        "I1", a, b,
                         dc=offset,  # DC analysis
                         source_type="SIN",
                         sin_params=sin_params
@@ -148,7 +148,7 @@ def parse_netlist(path: str) -> NetlistOOP:
                     }
                     
                     elems.append(CurrentSource(
-                        a, b,
+                        "I1", a, b,
                         dc=i1,  # DC analysis
                         source_type="PULSE",
                         pulse_params=pulse_params

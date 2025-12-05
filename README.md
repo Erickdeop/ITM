@@ -34,3 +34,15 @@ For nonlinear circuits that may have convergence difficulties, the simulator imp
 ```bash
 pytest tests/ -v
 ```
+
+## Visual Comparison with Reference Simulations
+
+Generate visual comparisons between Python simulation and reference `.sim` files:
+
+```bash
+# Generate all comparisons (saved to comparisons/ directory)
+./generate_all_comparisons.sh
+
+# Generate single comparison
+python plot.py --net circuits/oscilator.net --output comparisons/result.png
+```

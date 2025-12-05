@@ -392,11 +392,28 @@ def save_sim_file(
     Salva resultados em formato .sim em CREATED_SIM_DIR.
     Colunas:
       t, V(node_ids...), [correntes extras...]
+
+    Números são formatados em decimal quando possível e em notação científica
+    apenas para valores muito pequenos ou muito grandes.
     """
+
+    def fmt(val: float) -> str:
+        # Use fixed-point for "normal" values, scientific for extremos
+        if val == 0.0:
+            return "0"
+        aval = abs(val)
+        if 1e-3 <= aval < 1e4:
+            # 6 casas, removendo zeros e ponto desnecessários
+            s = f"{val:.6f}"
+            s = s.rstrip("0").rstrip(".")
+            return s if s != "-0" else "0"
+        # Caso contrário, mantém notação científica
+        return f"{val:.6e}"
+
     CREATED_SIM_DIR.mkdir(parents=True, exist_ok=True)
     path = CREATED_SIM_DIR / f"{base_name}.sim"
 
-    headers = ["t"] + [f"{n}" for n in node_ids]
+    headers = ["t"] + [str(n) for n in node_ids]  # ou [f"V({n})"] se preferir
     if extra_signals:
         headers.extend(extra_signals.keys())
 
@@ -406,14 +423,14 @@ def save_sim_file(
 
         n_steps = len(t)
         for k in range(n_steps):
-            row = [f"{t[k]:.6e}"]
+            row: list[str] = [fmt(float(t[k]))]
             # tensões de nó
             for i in range(len(node_ids)):
-                row.append(f"{node_data[i, k]:.6e}")
+                row.append(fmt(float(node_data[i, k])))
             # correntes extras
             if extra_signals:
                 for name in extra_signals.keys():
-                    row.append(f"{extra_signals[name][k]:.6e}")
+                    row.append(fmt(float(extra_signals[name][k])))
             f.write(" ".join(row) + "\n")
 
     return path
@@ -498,9 +515,7 @@ def _cli():
         if sim_file:
             sim_time, sim_vars = load_sim_file(sim_file)
 
-        # ----------------- Call plot -----------------
-        plot_all(t, py_vars, sim_time, sim_vars) # type: ignore
-
+        # ----------------- Save sim file meanwhile -----------------
 
         if args.create_sim:
             base_name = netlist_path if netlist_path is not None else "interactive_circuit"
@@ -522,6 +537,10 @@ def _cli():
                 extra_signals=extra_signals,
             )
             print(f"\n[INFO] Arquivo .sim gerado em: {sim_out_path}")
+
+        
+        # ----------------- Call plot -----------------
+        plot_all(t, py_vars, sim_time, sim_vars) # type: ignore
         
     else: # data.transient.enabled = false
         print("CIRCUIT DC ANALYSIS RESULTS")

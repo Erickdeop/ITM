@@ -2,7 +2,7 @@
 
 Simulador SPICE educacional implementado em Python utilizando Análise Nodal Modificada (MNA) com arquitetura orientada a objetos.
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -40,14 +40,34 @@ pip install -r requirements.txt
 ### Exemplos de Uso
 
 ```bash
+python3 main.py
+
+# Gera a criação de um novo circuito:
+# ==> NOVO CIRCUITO: CIRCUITO_1
+#        1. Renomear circuito
+#        2. Adicionar componente
+#        3. Remover componente
+#        4. Visualizar componentes
+#        5. Alterar configurações de simulação
+#        6. Adicionar arquivo .sim para comparação
+#        7. Salvar netlist para arquivo .net
+#        8. Rodar simulação
+#        0. Sair
+# Escolha uma opção:
+```
+
 # Análise DC de divisor de tensão
+```bash
 python main.py --netlist ./circuits/vdc_divider.net
-
+```
 # Análise transiente de circuito RC com fonte senoidal
+```bash
 python main.py --netlist ./circuits/rc_sine_parallel.net
-
+```
 # Circuito com fonte PULSE
+```bash
 python main.py --netlist ./circuits/pulse.net
+```
 
 ## Documentação Completa
 
@@ -111,6 +131,19 @@ ITM/
 └── requirements.txt    # Dependências Python
 ```
 
+## Comparação visual com valores de referência
+
+Gera comparações visuais entre as simulações Python atuais e as de referência `.sim`:
+
+```bash
+# Generate all comparisons (saved to comparisons/ directory)
+# Gera todas as comparações (salvas na pasta comparisons)
+./generate_all_comparisons.sh
+
+# Gera uma única comparação
+python plot.py --net circuits/oscilator.net --output comparisons/result.png
+```
+
 ## Newton-Raphson com Retry Automático
 
 Para circuitos não-lineares com dificuldades de convergência, o simulador implementa:
@@ -137,7 +170,3 @@ Consulte a documentação completa para sintaxe detalhada de todos os elementos.
 ## Contribuição
 
 Desenvolvido como projeto para a disciplina de Instrumentação e Técnicas de Medida (ITM) - UFRJ.
-
-## Licença
-
-Este projeto é distribuído sob licença MIT. Veja o arquivo LICENSE para mais detalhes.

@@ -111,13 +111,13 @@ Testar análise DC:
 
 .. code-block:: bash
 
-   python -m simulator.circuit --netlist ./circuits/example_dc.net --analysis DC --nodes 1
+   python3 -m simulator.circuit --netlist ./circuits/example_dc.net --analysis DC --nodes 1
 
 Testar análise transiente:
 
 .. code-block:: bash
 
-   python -m simulator.circuit --netlist ./circuits/example_tran.net --analysis TRAN --total_time 1e-3 --dt 1e-5 --method TRAP --nodes 1
+   python3 -m simulator.circuit --netlist ./circuits/example_tran.net --analysis TRAN --total_time 1e-3 --dt 1e-5 --method TRAP --nodes 1
 
 Solução de Problemas Comuns
 ----------------------------

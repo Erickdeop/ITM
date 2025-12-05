@@ -24,7 +24,7 @@ Simulador SPICE educacional implementado em Python utilizando Análise Nodal Mod
 
 ```bash
 # Clone o repositório
-git clone <url-do-repositorio>
+git clone git@github.com:Erickdeop/ITM.git #SSH
 cd ITM
 
 # Opcional, mas é útil ter um ambiente virtual para os requirements
@@ -137,7 +137,7 @@ Consulte a documentação completa para sintaxe detalhada de todos os elementos.
 
 ## Contribuição
 
-Desenvolvido como projeto educacional para a disciplina de Introdução às Técnicas Microeletrônicas (ITM) - UFRJ.
+Desenvolvido como projeto para a disciplina de Instrumentação e Técnicas de Medida (ITM) - UFRJ.
 
 ## Licença
 

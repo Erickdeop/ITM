@@ -21,7 +21,7 @@ def test_current_source_sin_oscillation(tmp_path):
     """
     path = create_netlist_file(tmp_path, netlist)
     data = parse_netlist(path)
-    times, outputs = solve_tran(data, 0.005, 1e-6, 1e-6, None, [1], TimeMethod.BACKWARD_EULER)
+    times, outputs, _ = solve_tran(data, 0.005, 1e-6, 1e-6, None, [1], TimeMethod.BACKWARD_EULER)
     
     assert np.max(outputs[0, :]) > 0.1
     assert np.min(outputs[0, :]) < -0.1
@@ -37,7 +37,7 @@ def test_current_source_pulse_levels(tmp_path):
     """
     path = create_netlist_file(tmp_path, netlist)
     data = parse_netlist(path)
-    times, outputs = solve_tran(data, 0.025, 1e-5, 1e-6, None, [1], TimeMethod.BACKWARD_EULER)
+    times, outputs, _ = solve_tran(data, 0.025, 1e-5, 1e-6, None, [1], TimeMethod.BACKWARD_EULER)
     
     idx_low = np.where(times < 0.0005)[0]
     idx_high = np.where((times > 0.002) & (times < 0.003))[0]

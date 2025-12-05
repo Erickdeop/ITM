@@ -11,7 +11,7 @@ def test_opamp_augments_mna():
     #   saída: a=1, b=2
     #   entradas: c=3 (v+), d=0 (v-)
     gain = 10.0
-    op = OpAmp(a=1, b=2, c=3, d=0, gain=gain)
+    op = OpAmp(name="O1", a=1, b=2, c=3, d=0, gain=gain)
 
     G2, I2 = op.stamp_dc(G.copy(), I.copy())
 
@@ -43,7 +43,7 @@ def test_opamp_does_not_change_original_G_I():
     G_copy = G.copy()
     I_copy = I.copy()
 
-    op = OpAmp(a=1, b=2, c=3, d=0, gain=1e5)
+    op = OpAmp(name="O1", a=1, b=2, c=3, d=0, gain=1e5)
     op.stamp_dc(G, I)
 
     # originais intactos

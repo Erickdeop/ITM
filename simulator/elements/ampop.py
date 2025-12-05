@@ -9,7 +9,6 @@ from .base import Element
 
 @dataclass
 class OpAmp(Element):
-    
     a: int  # nó de saída +
     b: int  # nó de saída -
     c: int  # entrada +

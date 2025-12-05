@@ -51,7 +51,7 @@ C1 2 0 0.00001
 
     v0 = np.zeros(data.max_node + 1)
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data=data,
         total_time=0.05,
         dt=0.0001,
@@ -88,7 +88,7 @@ L1 2 0 0.001
 
     data = parse_netlist(str(path))
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data=data,
         total_time=0.02,
         dt=0.0001,

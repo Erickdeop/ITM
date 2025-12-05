@@ -118,6 +118,19 @@ ITM/
 └── requirements.txt    # Dependências Python
 ```
 
+## Comparação visual com valores de referência
+
+Gera comparações visuais entre as simulações Python atuais e as de referência `.sim`:
+
+```bash
+# Generate all comparisons (saved to comparisons/ directory)
+# Gera todas as comparações (salvas na pasta comparisons)
+./generate_all_comparisons.sh
+
+# Gera uma única comparação
+python plot.py --net circuits/oscilator.net --output comparisons/result.png
+```
+
 ## Newton-Raphson com Retry Automático
 
 Para circuitos não-lineares com dificuldades de convergência, o simulador implementa:
@@ -144,7 +157,3 @@ Consulte a documentação completa para sintaxe detalhada de todos os elementos.
 ## Contribuição
 
 Desenvolvido como projeto para a disciplina de Instrumentação e Técnicas de Medida (ITM) - UFRJ.
-
-## Licença
-
-Este projeto é distribuído sob licença MIT. Veja o arquivo LICENSE para mais detalhes.

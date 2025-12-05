@@ -57,10 +57,10 @@ def test_vcvs_inverting():
     from simulator.parser import NetlistOOP, TransientSettings
     
     elements = [
-        VoltageSource(1, 0, dc=5.0, source_type="DC"),
-        VCVS(2, 0, 1, 0, gain=-1.0),
-        Resistor(1, 0, 1000.0),
-        Resistor(2, 0, 1000.0)
+        VoltageSource("V1", 1, 0, dc=5.0, source_type="DC"),
+        VCVS("E1", 2, 0, 1, 0, gain=-1.0),
+        Resistor("R1", 1, 0, 1000.0),
+        Resistor("R1", 2, 0, 1000.0)
     ]
     
     netlist = NetlistOOP(elements, 2, TransientSettings())
@@ -78,10 +78,10 @@ def test_vccs_zero_control():
     from simulator.parser import NetlistOOP, TransientSettings
     
     elements = [
-        VoltageSource(1, 0, dc=0.0, source_type="DC"),
-        VCCS(2, 0, 1, 0, gm=0.01),
-        Resistor(1, 0, 1000.0),
-        Resistor(2, 0, 1000.0)
+        VoltageSource("V1", 1, 0, dc=0.0, source_type="DC"),
+        VCCS("G1", 2, 0, 1, 0, gm=0.01),
+        Resistor("R1", 1, 0, 1000.0),
+        Resistor("R2", 2, 0, 1000.0)
     ]
     
     netlist = NetlistOOP(elements, 2, TransientSettings())

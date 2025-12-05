@@ -12,7 +12,7 @@ from simulator.elements.base import TimeMethod
 def test_example_tran_transient_runs():
     data = parse_netlist("circuits/example_tran.net")
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data,
         total_time=0.01,
         dt=1e-4,

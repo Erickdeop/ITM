@@ -1,6 +1,9 @@
 import argparse
 from typing import Tuple
 from pathlib import Path
+import numpy as np
+from typing import Optional
+from datetime import datetime
 
 from simulator.parser import parse_netlist
 from simulator.circuit import Circuit
@@ -8,6 +11,7 @@ from simulator.builder import CircuitBuilder
 from plot import find_sim_file, load_sim_file, plot_all 
 
 NETLIST_OUTPUT_DIR = Path("./created_net_files")
+CREATED_SIM_DIR = Path("./created_sim_files")
 
 # ------------------------------------------------#
 #             ADD COMPONENT TO CIRCUIT            #
@@ -373,7 +377,46 @@ def build_circuit() -> Tuple[Circuit, str]:
     print ("\n\nFINALIZANDO CONSTRUÇÃO DO CIRCUITO...")
     return Circuit(new_circuit), sim_file  # Placeholder implementation
 
+# ------------------------------------------------#
+#                     HELPER                      #
+# ------------------------------------------------#
 
+def save_sim_file(
+    base_name: str,
+    t: np.ndarray,
+    node_ids: list[int],
+    node_data: np.ndarray,
+    extra_signals: dict[str, np.ndarray] | None = None,
+) -> Path:
+    """
+    Salva resultados em formato .sim em CREATED_SIM_DIR.
+    Colunas:
+      t, V(node_ids...), [correntes extras...]
+    """
+    CREATED_SIM_DIR.mkdir(parents=True, exist_ok=True)
+    path = CREATED_SIM_DIR / f"{base_name}.sim"
+
+    headers = ["t"] + [f"{n}" for n in node_ids]
+    if extra_signals:
+        headers.extend(extra_signals.keys())
+
+    with path.open("w") as f:
+        f.write("* Gerado pelo ITM simulator\n")
+        f.write(" ".join(headers) + "\n")
+
+        n_steps = len(t)
+        for k in range(n_steps):
+            row = [f"{t[k]:.6e}"]
+            # tensões de nó
+            for i in range(len(node_ids)):
+                row.append(f"{node_data[i, k]:.6e}")
+            # correntes extras
+            if extra_signals:
+                for name in extra_signals.keys():
+                    row.append(f"{extra_signals[name][k]:.6e}")
+            f.write(" ".join(row) + "\n")
+
+    return path
 
 # ------------------------------------------------#
 #                   CLI MANAGER                   #
@@ -385,24 +428,35 @@ def _cli():
     parser.add_argument("--nr_tol", type=float, default=1e-8)
     parser.add_argument("--nodes", nargs="+", type=int, default=None)
     parser.add_argument("--guide", type=str) # existing .sim file path to print alongsige
-    parser.add_argument("--create_sim", action="store_true") # create .sim file after simulating
+    parser.add_argument("--create_sim", action="store_true", default=True) # create .sim file after simulating
 
     
     args = parser.parse_args()
+    netlist_path: Optional[str] = None
 
     # Built or open existing circuit
     if args.netlist is None:
         circuit, sim_file = build_circuit()
+        print("\n[INFO] Circuito criado via modo interativo.")
     else:
         netlist = parse_netlist(args.netlist)
         circuit = Circuit(netlist)
+        print(f"\n[INFO] Netlist carregada de: {netlist_path}")
         if args.guide:
             sim_file = args.guide
 
+    if args.nodes is not None:
+        desired_nodes = args.nodes
+    else:
+        # Todos os nós exceto o nó 0 (terra)
+        max_node = circuit.data.max_node
+        desired_nodes = list(range(1, max_node + 1))
+
     if __debug__:
         circuit.print()
-
-    # Transient or DC based on netlist settings
+    # ---------------------------------------------------- #
+    #      Transient or DC based on netlist settings       #
+    # ---------------------------------------------------- #
     if circuit.data.transient.enabled:
         t, out = circuit.run_tran(
             args.nodes,
@@ -410,7 +464,7 @@ def _cli():
         )
 
         print("\n==> TRANSIENT CIRCUIT ANALYSIS RESULTS")
-        print("Transient points:", len(t))
+        print(f"\tSimulação transiente concluída com {len(t)} pontos.")
         if args.nodes is None:
             node_ids = list(range(out.shape[0]))
         else:
@@ -423,10 +477,14 @@ def _cli():
 
         # ------------------ PLOTTING ---------------------
         # ----------------- Dict for plot -----------------
-        py_vars = {
-            f"Node_{node_ids[i]}": out[i]
-            for i in range(out.shape[0])
-        }
+        if getattr(circuit, "last_tran_signals", None):
+            py_vars = circuit.last_tran_signals
+        else:
+            # Fallback: only node tensions
+            py_vars = {
+                f"Node_{node}": out[i, :]
+                for i, node in enumerate(desired_nodes)
+            }
 
         # ---------- Choose correct .sim file --------------
         sim_time = None
@@ -441,7 +499,29 @@ def _cli():
             sim_time, sim_vars = load_sim_file(sim_file)
 
         # ----------------- Call plot -----------------
-        plot_all(t, py_vars, sim_time, sim_vars)
+        plot_all(t, py_vars, sim_time, sim_vars) # type: ignore
+
+
+        if args.create_sim:
+            base_name = netlist_path if netlist_path is not None else "interactive_circuit"
+            now = datetime.now()
+            timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
+            base_name += "_" + timestamp
+
+            extra_signals = {
+                name: values
+                for name, values in py_vars.items() #type: ignore
+                if not name.startswith("Node_")
+            }
+
+            sim_out_path = save_sim_file(
+                base_name=base_name,
+                t=t,
+                node_ids=node_ids,
+                node_data=out,
+                extra_signals=extra_signals,
+            )
+            print(f"\n[INFO] Arquivo .sim gerado em: {sim_out_path}")
         
     else: # data.transient.enabled = false
         print("CIRCUIT DC ANALYSIS RESULTS")

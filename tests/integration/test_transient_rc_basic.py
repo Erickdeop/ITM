@@ -6,7 +6,7 @@ from simulator.elements.base import TimeMethod
 def test_transient_rc_step():
     data = parse_netlist("circuits/rc_sine_parallel.net")
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data,
         total_time=0.01,
         dt=1e-4,

@@ -26,6 +26,7 @@ class NetlistOOP:
 class Circuit:
     def __init__(self, data: NetlistOOP):
         self.data = data
+        self.name: str
         self.last_tran_time = None          # np.ndarray | None
         self.last_tran_signals = None       # dict[str, np.ndarray] | None
 

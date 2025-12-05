@@ -41,14 +41,13 @@ pip install -r requirements.txt
 
 ```bash
 # Análise DC de divisor de tensão
-python -m simulator.circuit --netlist ./circuits/vdc_divider.net --analysis DC --nodes 1 2
+python main.py --netlist ./circuits/vdc_divider.net
 
 # Análise transiente de circuito RC com fonte senoidal
-python -m simulator.circuit --netlist ./circuits/rc_sine_parallel.net --analysis TRAN --total_time 10e-3 --dt 1e-5 --method TRAP --nodes 1
+python main.py --netlist ./circuits/rc_sine_parallel.net
 
 # Circuito com fonte PULSE
-python -m simulator.circuit --netlist ./circuits/pulse.net --analysis TRAN --total_time 5e-3 --dt 1e-6 --method BE --nodes 1
-```
+python main.py --netlist ./circuits/pulse.net
 
 ## Documentação Completa
 

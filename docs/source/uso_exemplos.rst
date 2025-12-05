@@ -7,6 +7,30 @@ Este guia apresenta exemplos práticos de como utilizar o Circuit Simulator MNA.
 Interface de Linha de Comando (CLI)
 ------------------------------------
 
+Criação de um circuito pela linha de comando
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   python3 main.py
+
+**Saída esperada**:
+
+.. code-block:: text
+
+   ==> NOVO CIRCUITO: CIRCUITO_1
+        1. Renomear circuito
+        2. Adicionar componente
+        3. Remover componente
+        4. Visualizar componentes
+        5. Alterar configurações de simulação
+        6. Adicionar arquivo .sim para comparação
+        7. Salvar netlist para arquivo .net
+        8. Rodar simulação
+        0. Sair
+   Escolha uma opção: 
+
+
 Análise DC Simples
 ~~~~~~~~~~~~~~~~~~
 
@@ -14,7 +38,7 @@ Analisar um divisor de tensão:
 
 .. code-block:: bash
 
-   python -m simulator.circuit --netlist ./circuits/vdc_divider.net --analysis DC --nodes 1 2
+   python3 -m simulator.circuit --netlist ./circuits/vdc_divider.net --analysis DC --nodes 1 2
 0
 **Saída esperada**:
 
@@ -31,7 +55,7 @@ Simular resposta de um circuito RC:
 
 .. code-block:: bash
 
-   python -m simulator.circuit \\
+   python3 -m simulator.circuit \\
        --netlist ./circuits/example_tran.net \\
        --analysis TRAN \\
        --total_time 1e-3 \\
@@ -52,7 +76,7 @@ Para criar circuitos interativamente:
 
 .. code-block:: bash
 
-   python main.py
+   python3 main.py
 
 Menu interativo permite:
   - Adicionar componentes dinamicamente
@@ -67,7 +91,7 @@ Para plotar e comparar resultados:
 
 .. code-block:: bash
 
-   python plot.py --net ./circuits/sinusoidal.net --tran 0.05 1e-4 --method BE --nodes 1
+   python3 plot.py --net ./circuits/sinusoidal.net --tran 0.05 1e-4 --method BE --nodes 1
 
 Se existir arquivo ``.sim`` correspondente, será comparado automaticamente.
 

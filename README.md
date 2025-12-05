@@ -2,7 +2,7 @@
 
 Simulador SPICE educacional implementado em Python utilizando Análise Nodal Modificada (MNA) com arquitetura orientada a objetos.
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](tests/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -40,14 +40,20 @@ pip install -r requirements.txt
 ### Exemplos de Uso
 
 ```bash
-# Análise DC de divisor de tensão
-python -m simulator.circuit --netlist ./circuits/vdc_divider.net --analysis DC --nodes 1 2
+python3 main.py
 
-# Análise transiente de circuito RC com fonte senoidal
-python -m simulator.circuit --netlist ./circuits/rc_sine_parallel.net --analysis TRAN --total_time 10e-3 --dt 1e-5 --method TRAP --nodes 1
-
-# Circuito com fonte PULSE
-python -m simulator.circuit --netlist ./circuits/pulse.net --analysis TRAN --total_time 5e-3 --dt 1e-6 --method BE --nodes 1
+# Gera a criação de um novo circuito:
+# ==> NOVO CIRCUITO: CIRCUITO_1
+#        1. Renomear circuito
+#        2. Adicionar componente
+#        3. Remover componente
+#        4. Visualizar componentes
+#        5. Alterar configurações de simulação
+#        6. Adicionar arquivo .sim para comparação
+#        7. Salvar netlist para arquivo .net
+#        8. Rodar simulação
+#        0. Sair
+# Escolha uma opção:
 ```
 
 ## Documentação Completa

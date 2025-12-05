@@ -38,31 +38,34 @@ class VoltageSource(Element):
 
     def _sin_value(self, time: float) -> float:
         """
-        Format: SIN(V_offset V_amplitude freq delay damping phase)
-        v(t) = V_offset + V_amplitude * exp(-damping*(t-delay)) * sin(2*pi*freq*(t-delay) + phase)
+        Formato: SIN(V_offset V_amplitude freq delay damping phase)
+        v(t) = V_offset + V_amplitude * exp(-damping*(t-delay))
+            * sin(2*pi*freq*(t-delay) + phase)
         """
         if self.sin_params is None:
             return self.dc
         
-        offset = self.sin_params.get("offset", 0.0)
+        offset    = self.sin_params.get("offset", 0.0)
         amplitude = self.sin_params.get("amplitude", 0.0)
-        freq = self.sin_params.get("freq", 0.0)
-        delay = self.sin_params.get("delay", 0.0)
-        damping = self.sin_params.get("damping", 0.0)
-        phase = self.sin_params.get("phase", 0.0)  # in radians
-        
-        # before delay, return offset
+        freq      = self.sin_params.get("freq", 0.0)
+        delay     = self.sin_params.get("delay", 0.0)
+        damping   = self.sin_params.get("damping", 0.0)
+        phase     = self.sin_params.get("phase", 0.0)  # vem em graus da netlist
+
+        # converte sempre pra radianos de forma explícita
+        phase_rad = math.radians(phase)
+
+        # 🔴 ANTES: return offset
+        # 🔵 AGORA: valor "congelado" da expressão no instante do delay
         if time < delay:
-            return offset
-        
+            return offset + amplitude * math.sin(phase_rad)
+
         t_eff = time - delay
         damping_factor = math.exp(-damping * t_eff) if damping > 0 else 1.0
-        
-        # phase correction
-        phase_rad = math.radians(phase) if abs(phase) > 2*math.pi else phase
-        
-        return offset + amplitude * damping_factor * math.sin(2 * math.pi * freq * t_eff + phase_rad)
 
+        return offset + amplitude * damping_factor * math.sin(
+            2 * math.pi * freq * t_eff + phase_rad
+        )
     def _pulse_value(self, time: float) -> float:
         """
         Format: PULSE(v1 v2 delay rise_time fall_time pulse_width period)

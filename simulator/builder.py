@@ -24,6 +24,21 @@ class CircuitBuilder:
     # TODO: INIT ABLE TO RECEIVE NETLISTOOP AND CONTINUE CREATION
     name: str = "CIRCUITO_1"
     max_node: int = 0
+
+    R_count: int = 0
+    C_count: int = 0
+    L_count: int = 0
+    I_count: int = 0
+    V_count: int = 0
+    N_count: int = 0
+    D_count: int = 0
+    E_count: int = 0
+    F_count: int = 0
+    G_count: int = 0
+    H_count: int = 0
+    O_count: int = 0
+
+
     elements: List[object] = field(default_factory=list)
     transient: TransientSettings = field(default_factory=TransientSettings)
 
@@ -40,23 +55,27 @@ class CircuitBuilder:
     # ----------------- Passive -----------------
     def add_resistor(self, a: int, b: int, R: float):
         """Resistor: R <node a> <node b> <R>"""
-        self.elements.append(Resistor(a, b, R))
+        self.R_count += 1
+        self.elements.append(Resistor("R"+str(self.R_count), a, b, R))
         self._update_max_node(a, b)
 
     def add_capacitor(self, a: int, b: int, C: float, ic: float = 0.0):
         """Capacitor: C <node a> <node b> <C> <ic>"""
-        self.elements.append(Capacitor(a, b, C, ic))
+        self.C_count += 1
+        self.elements.append(Capacitor("C"+str(self.C_count), a, b, C, ic))
         self._update_max_node(a, b)
 
     def add_inductor(self, a: int, b: int, L: float, ic: float = 0.0):
         """Inductor: L [<node a> <node b> <L> <ic>"""
-        self.elements.append(Inductor(a, b, L, ic))
+        self.L_count += 1
+        self.elements.append(Inductor("L"+str(self.L_count), a, b, L, ic))
         self._update_max_node(a, b)
 
     # ------------- Current Sources --------------
     def add_current_source_dc(self, a: int, b: int, dc: float):
         """Current Source DC: I <node a> <node b> DC <dc>"""
-        self.elements.append(CurrentSource(a, b, dc=dc, is_ac=False))
+        self.I_count += 1
+        self.elements.append(CurrentSource("I"+str(self.I_count), a, b, dc=dc, is_ac=False))
         self._update_max_node(a, b)
 
     def add_current_source_ac(
@@ -69,8 +88,10 @@ class CircuitBuilder:
         phase_deg: float = 0.0,
     ):
         """Current Source AC: I <node a> <node b> AC <dc> <amp> <freq> <phase>"""
+        self.I_count += 1
         self.elements.append(
             CurrentSource(
+                "I"+str(self.I_count), 
                 a,
                 b,
                 dc=dc,
@@ -85,8 +106,9 @@ class CircuitBuilder:
     # ----------------- Voltage Sources -----------------
     def add_voltage_source_dc(self, a: int, b: int, dc: float):
         """Voltage Source DC: V a b DC <dc>"""
+        self.V_count += 1
         self.elements.append(
-            VoltageSource(a, b, dc=dc, is_ac=False, source_type="DC")
+            VoltageSource("V"+str(self.V_count), a, b, dc=dc, is_ac=False, source_type="DC")
         )
         self._update_max_node(a, b)
 
@@ -100,8 +122,10 @@ class CircuitBuilder:
         phase_deg: float = 0.0,
     ):
         """Voltage Source AC: V a b AC <dc> <amp> <freq> <phase>"""
+        self.V_count += 1
         self.elements.append(
             VoltageSource(
+                "V"+str(self.V_count), 
                 a,
                 b,
                 dc=dc,
@@ -126,6 +150,7 @@ class CircuitBuilder:
         phase_deg: float = 0.0,
     ):
         """Sin Voltage Source: V <node a> <node b> SIN <offset> <amplitude> <freq> <delay> <damping> <phase>"""
+        self.V_count += 1
         sin_params = {
             "offset": offset,
             "amplitude": amplitude,
@@ -136,6 +161,7 @@ class CircuitBuilder:
         }
         self.elements.append(
             VoltageSource(
+                "V"+str(self.V_count), 
                 a,
                 b,
                 dc=offset,  # valor de DC para análise DC
@@ -158,6 +184,7 @@ class CircuitBuilder:
         period: float = 0.0,
     ):
         """Pulse Voltage Source: V <node a> <node b> PULSE <v1> <v2> <delay> <rise> <fall> <width> <period>"""
+        self.V_count += 1
         pulse_params = {
             "v1": v1,
             "v2": v2,
@@ -169,6 +196,7 @@ class CircuitBuilder:
         }
         self.elements.append(
             VoltageSource(
+                "V"+str(self.V_count), 
                 a,
                 b,
                 dc=v1,  # valor de DC para análise DC
@@ -181,29 +209,35 @@ class CircuitBuilder:
     # ----------------- Controlled Sources -----------------
     def add_vcvs(self, a: int, b: int, c: int, d: int, gain: float):
         """VCVS: E <n+> <n-> <nc+> <nc-> <gain>"""
-        self.elements.append(VCVS(a, b, c, d, gain))
+        self.E_count += 1
+        self.elements.append(VCVS("E"+str(self.E_count), a, b, c, d, gain))
         self._update_max_node(a, b, c, d)
 
     def add_cccs(self, a: int, b: int, c: int, d: int, gain: float):
         """CCCS: F <n+> <n-> <nc+> <nc-> <gain>"""
-        self.elements.append(CCCS(a, b, c, d, gain))
+        self.F_count += 1
+        self.elements.append(CCCS("F"+str(self.F_count), a, b, c, d, gain))
         self._update_max_node(a, b, c, d)
 
     def add_vccs(self, a: int, b: int, c: int, d: int, gm: float):
         """VCCS: G <n+> <n-> <nc+> <nc-> <gm>"""
-        self.elements.append(VCCS(a, b, c, d, gm))
+        self.G_count += 1
+        self.elements.append(VCCS("G"+str(self.G_count), a, b, c, d, gm))
         self._update_max_node(a, b, c, d)
 
     def add_ccvs(self, a: int, b: int, c: int, d: int, rm: float):
         """CCVS: H <n+> <n-> <nc+> <nc-> <rm>"""
-        self.elements.append(CCVS(a, b, c, d, rm))
+        self.H_count += 1
+        self.elements.append(CCVS("H"+str(self.H_count), a, b, c, d, rm))
         self._update_max_node(a, b, c, d)
 
     # ------------------------- AmpOp -----------------------
     def add_opamp(self, vp: int, vn: int, vo: int, gain: float = 1e5):
         """OpAmp ideal: O <vp> <vn> <vo> [gain]"""
+        self.O_count += 1
         self.elements.append(
             OpAmp(
+                "O"+str(self.O_count), 
                 a=vo,   # Out +
                 b=0,    # Out -
                 c=vp,   # In +
@@ -223,10 +257,12 @@ class CircuitBuilder:
         I_points: list[float],
     ):
         """Non Linear Resistor: N <node a> <node b> <V1> <I1> <V2> <I2> <V3> <I3> <V4> <I4>"""
+        self.R_count += 1
         if len(V_points) != 4 or len(I_points) != 4:
             raise ValueError("São necessários exatamente 4 pontos (V,I) para o resistor não-linear.")
         self.elements.append(
             NonLinearResistor(
+                "N"+str(self.R_count), 
                 a,
                 b,
                 np.array(V_points, dtype=float),
@@ -237,7 +273,8 @@ class CircuitBuilder:
 
     def add_diode(self, a: int, b: int):
         """Diode: D <node a> <node b>"""
-        self.elements.append(Diode(a, b))
+        self.R_count += 1
+        self.elements.append(Diode("D"+str(self.R_count), a, b))
         self._update_max_node(a, b)
 
 
@@ -303,22 +340,15 @@ class CircuitBuilder:
         # 1ª linha: número de nós do circuito
         lines.append(str(self.max_node))
 
-        # Contadores de nomes sintéticos
-        r_count = c_count = l_count = i_count = v_count = d_count = nl_count = 0
-
         for elem in self.elements:
             # ----------------- RESISTOR -----------------
             if isinstance(elem, Resistor):
-                r_count += 1
-                name = f"R{r_count}"
                 # Formato: Rname a b R
-                lines.append(f"{name} {elem.a} {elem.b} {elem.R}")
+                lines.append(f"{elem.name} {elem.a} {elem.b} {elem.R}")
 
             # ----------------- CAPACITOR -----------------
             elif isinstance(elem, Capacitor):
-                c_count += 1
-                name = f"C{c_count}"
-                base = f"{name} {elem.a} {elem.b} {elem.C}"
+                base = f"{elem.name} {elem.a} {elem.b} {elem.C}"
                 # Quinta palavra opcional: IC=<valor>
                 if getattr(elem, "Ic", 0.0):
                     base += f" IC={elem.v0}"
@@ -326,55 +356,47 @@ class CircuitBuilder:
 
             # ----------------- INDUTOR -----------------
             elif isinstance(elem, Inductor):
-                l_count += 1
-                name = f"L{l_count}"
-                base = f"{name} {elem.a} {elem.b} {elem.L}"
+                base = f"{elem.name} {elem.a} {elem.b} {elem.L}"
                 if getattr(elem, "Ic", 0.0):
                     base += f" IC={elem.i0}"
                 lines.append(base)
 
             # ----------------- FONTE DE CORRENTE -----------------
             elif isinstance(elem, CurrentSource):
-                i_count += 1
-                name = f"I{i_count}"
                 # Aqui assumo que o caso mais comum é DC
                 # Formato: Iname a b DC valor
                 dc = getattr(elem, "dc", 0.0)
                 is_ac = getattr(elem, "is_ac", False)
                 if not is_ac:
-                    lines.append(f"{name} {elem.a} {elem.b} DC {dc}")
+                    lines.append(f"{elem.name} {elem.a} {elem.b} DC {dc}")
                 else:
                     # Extensível depois para SIN/PULSE/etc.
-                    lines.append(f"* Fonte de corrente AC não suportada na exportação: {name}")
+                    lines.append(f"* Fonte de corrente AC não suportada na exportação: {elem.name}")
 
             # ----------------- FONTE DE TENSÃO -----------------
             elif isinstance(elem, VoltageSource):
-                v_count += 1
-                name = f"V{v_count}"
                 dc = getattr(elem, "dc", 0.0)
                 is_ac = getattr(elem, "is_ac", False)
                 if not is_ac:
-                    lines.append(f"{name} {elem.a} {elem.b} DC {dc}")
+                    lines.append(f"{elem.name} {elem.a} {elem.b} DC {dc}")
                 else:
-                    lines.append(f"* Fonte de tensão AC não suportada na exportação: {name}")
+                    # TODO: Add other voltage sources
+                    lines.append(f"* Fonte de tensão AC não suportada na exportação: {elem.name}")
 
             # ----------------- RESISTOR NÃO LINEAR -----------------
             elif isinstance(elem, NonLinearResistor):
-                nl_count += 1
-                name = f"RN{nl_count}"
                 # Especificação de netlist para esse cara ainda não está formalizada,
                 # então deixo como comentário para não quebrar o parser.
-                lines.append(f"* NonLinearResistor {name} {elem.a} {elem.b}")
+                lines.append(f"* NonLinearResistor {elem.name} {elem.a} {elem.b}")
 
             # ----------------- DIODO -----------------
             elif isinstance(elem, Diode):
-                d_count += 1
-                name = f"D{d_count}"
                 # Formato: Dname a b
-                lines.append(f"{name} {elem.a} {elem.b}")
+                lines.append(f"{elem.name} {elem.a} {elem.b}")
 
             # ----------------- OUTROS -----------------
             else:
+                # TODO: Add opamp and controlled sources
                 # Não impede salvar o arquivo, só documenta o elemento
                 lines.append(f"* Elemento não suportado na exportação: {elem}")
 

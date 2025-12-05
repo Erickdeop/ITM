@@ -10,7 +10,7 @@ def test_tran_rc_ic_discharge():
     """
     data = parse_netlist("circuits/example_rc_ic.net")
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data,
         total_time=5e-3,          # ~5 tau to R=1k, C=1e-6
         dt=1e-5,
@@ -35,7 +35,7 @@ def test_tran_rl_ic_decay():
     """
     data = parse_netlist("circuits/example_rl_ic.net")
 
-    t, out = solve_tran(
+    t, out, _ = solve_tran(
         data,
         total_time=5e-4,          # ~5 tau to L=1e-3, R=10 (tau = 1e-4)
         dt=1e-6,

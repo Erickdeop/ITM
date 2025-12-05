@@ -55,8 +55,6 @@ class VoltageSource(Element):
         # converte sempre pra radianos de forma explícita
         phase_rad = math.radians(phase)
 
-        # 🔴 ANTES: return offset
-        # 🔵 AGORA: valor "congelado" da expressão no instante do delay
         if time < delay:
             return offset + amplitude * math.sin(phase_rad)
 

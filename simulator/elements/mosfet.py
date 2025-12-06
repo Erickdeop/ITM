@@ -1,3 +1,6 @@
-from .base_element import ElementoCircuito
+from .base import Element
+from dataclasses import dataclass
 
-class Mosfet(ElementoCircuito):
+@dataclass
+class Mosfet(Element):
+    pass

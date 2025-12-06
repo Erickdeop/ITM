@@ -1,48 +1,172 @@
 # Circuit Simulator (MNA) — OOP
 
-Classes por elemento + polimorfismo. Métodos de integração: BE, FE, TRAP.
+Simulador SPICE educacional implementado em Python utilizando Análise Nodal Modificada (MNA) com arquitetura orientada a objetos.
 
-## Features
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](tests/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-- Modified Nodal Analysis (MNA) with OOP architecture
-- Linear elements: R, L, C
-- Sources: DC, AC (SIN, PULSE)
-- Controlled sources: VCVS, VCCS, CCVS, CCCS
-- Nonlinear elements: Diode, Nonlinear Resistor
-- Newton-Raphson with multiple random guess retries (handles difficult convergence)
-- Integration methods: Backward Euler (BE), Forward Euler (FE), Trapezoidal (TRAP)
-- DC and Transient analysis
+## Características Principais
 
-## Quick Start
+- **Análise Nodal Modificada (MNA)** com arquitetura OOP
+- **Elementos lineares**: Resistor, Indutor, Capacitor
+- **Fontes independentes**: DC, AC com formas de onda SIN e PULSE
+- **Fontes controladas**: VCVS (E), VCCS (G), CCVS (H), CCCS (F)
+- **Elementos não-lineares**: Diodo, Resistor não-linear
+- **Métodos de integração**: Backward Euler (BE), Forward Euler (FE), Trapezoidal (TRAP)
+- **Solver não-linear**: Newton-Raphson com retry automático
+- **Tipos de análise**: DC e Transiente
+- **Visualização**: Gráficos de forma de onda com Matplotlib
+
+## Início Rápido
+
+### Instalação
 
 ```bash
+# Clone o repositório
+git clone git@github.com:Erickdeop/ITM.git #SSH
+cd ITM
+
+# Opcional, mas é útil ter um ambiente virtual para os requirements
+python3 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# ou
+.venv\\Scripts\\activate  # Windows
+
+# Instale as dependências
 pip install -r requirements.txt
-python -m simulator.circuit --netlist ./circuits/example_dc.net --analysis DC --nodes 1
-python -m simulator.circuit --netlist ./circuits/example_tran.net --analysis TRAN --total_time 1e-3 --dt 1e-5 --method TRAP --nodes 1
 ```
 
-## Newton-Raphson Retry Mechanism
+### Exemplos de Uso
+#### Circuito manual
+```bash
+python3 main.py
 
-For nonlinear circuits that may have convergence difficulties, the simulator implements an automatic retry mechanism:
+# Gera a criação de um novo circuito:
+# ==> NOVO CIRCUITO: CIRCUITO_1
+#        1. Renomear circuito
+#        2. Adicionar componente
+#        3. Remover componente
+#        4. Visualizar componentes
+#        5. Alterar configurações de simulação
+#        6. Adicionar arquivo .sim para comparação
+#        7. Salvar netlist para arquivo .net
+#        8. Rodar simulação
+#        0. Sair
+# Escolha uma opção:
+```
 
-- **N iterations per guess** (default: 50, typically 20-50)
-- **M random guesses maximum** (default: 100)
-- Automatically generates new random initial guesses if convergence fails
+#### Análise DC de divisor de tensão
+```bash
+python main.py --netlist ./circuits/vdc_divider.net
+```
+#### Análise transiente de circuito RC com fonte senoidal
+```bash
+python main.py --netlist ./circuits/rc_sine_parallel.net
+```
+#### Circuito com fonte PULSE
+```bash
+python main.py --netlist ./circuits/pulse.net
+```
 
-## Testing
+## Documentação Completa
+
+A documentação completa do projeto está disponível em formato HTML gerada com Sphinx:
 
 ```bash
-pytest tests/ -v
+# Gerar documentação
+cd docs
+make html
+
+# Abrir no navegador
+firefox build/html/index.html
 ```
 
-## Visual Comparison with Reference Simulations
+A documentação inclui:
 
-Generate visual comparisons between Python simulation and reference `.sim` files:
+- **Visão Geral**: Introdução e características do projeto
+- **Instalação**: Guia de configuração do projeto
+- **Arquitetura**: Estrutura do código, módulos e padrões de design
+- **Uso e Exemplos**: Tutoriais práticos com netlists de exemplo
+- **API Reference**: Documentação completa de todas as classes e métodos
+- **Testes**: Guia de teste e cobertura
+- **Diagrama de Classes**: UML e hierarquia de herança
+
+## Testes
+
+O projeto possui 76 testes (100% passing) organizados em testes unitários e de integração:
+
+```bash
+# Executar todos os testes
+pytest tests/ -v
+
+# Apenas testes unitários
+pytest tests/unit/ -v
+
+# Apenas testes de integração
+pytest tests/integration/ -v
+
+# Com relatório de cobertura
+pytest tests/ -v --cov=simulator --cov-report=html
+```
+
+## Estrutura do Projeto
+
+```
+ITM/
+├── simulator/          # Código principal
+│   ├── parser.py       # Parser de netlists
+│   ├── circuit.py      # Interface principal
+│   ├── engine.py       # Motor de simulação MNA
+│   ├── newton.py       # Solver Newton-Raphson
+│   ├── builder.py      # Builder pattern para construção
+│   └── elements/       # Classes de elementos
+├── circuits/           # Netlists de exemplo
+├── tests/              # Suíte de testes
+│   ├── unit/           # Testes unitários
+│   └── integration/    # Testes de integração
+├── docs/               # Documentação Sphinx
+│   ├── source/         # Arquivos RST
+│   └── build/html/     # HTML gerado
+└── requirements.txt    # Dependências Python
+```
+
+## Comparação visual com valores de referência
+
+Gera comparações visuais entre as simulações Python atuais e as de referência `.sim`:
 
 ```bash
 # Generate all comparisons (saved to comparisons/ directory)
+# Gera todas as comparações (salvas na pasta comparisons)
 ./generate_all_comparisons.sh
 
-# Generate single comparison
+# Gera uma única comparação
 python plot.py --net circuits/oscilator.net --output comparisons/result.png
 ```
+
+## Newton-Raphson com Retry Automático
+
+Para circuitos não-lineares com dificuldades de convergência, o simulador implementa:
+
+- **N iterações por tentativa** (padrão: 50)
+- **M tentativas com guesses aleatórios** (padrão: 100)
+- Geração automática de novos chutes iniciais em caso de falha
+- Tolerância configurável (padrão: 1e-6)
+
+## Formato de Netlist
+
+O simulador aceita netlists em formato SPICE simplificado:
+
+```spice
+* Exemplo: Divisor de tensão
+V1 1 0 DC 10
+R1 1 2 1k
+R2 2 0 2k
+.END
+```
+
+Consulte a documentação completa para sintaxe detalhada de todos os elementos.
+
+## Contribuição
+
+Desenvolvido como projeto para a disciplina de Instrumentação e Técnicas de Medida (ITM) - UFRJ.

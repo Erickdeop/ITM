@@ -6,6 +6,7 @@ from typing import List
 
 from .engine import solve_dc, solve_tran
 from .elements.base import TimeMethod
+from .elements.base import Element
 
 @dataclass
 class TransientSettings:
@@ -18,7 +19,7 @@ class TransientSettings:
 
 @dataclass
 class NetlistOOP:
-    elements: List[object]
+    elements: List[Element]
     max_node: int
     transient: TransientSettings = field(default_factory=TransientSettings)
     has_nonlinear_elements: bool = False  # True if circuit contains nonlinear elements
@@ -26,8 +27,8 @@ class NetlistOOP:
 class Circuit:
     def __init__(self, data: NetlistOOP):
         self.data = data
-        self.last_tran_time = None          # np.ndarray | None
-        self.last_tran_signals = None       # dict[str, np.ndarray] | None
+        self.last_tran_time: np.ndarray | None = None          # np.ndarray | None
+        self.last_tran_signals: dict[str, np.ndarray] | None = None       # dict[str, np.ndarray] | None
 
     # ------------------------ DC ------------------------
     def run_dc(self, desired_nodes=None, nr_tol: float = 1e-8, v0_vector=None,
@@ -171,9 +172,3 @@ class Circuit:
                 f"Transient settings: t_stop={ts.t_stop}, dt={ts.dt}, method={ts.method},"
                 f" internal step={ts.intetnal_steps}, uic={ts.uic}\n"
             )
-
-
-# ======================================================
-#                        CLI
-# ======================================================
-

@@ -5,3 +5,7 @@ pytest-cov
 flake8
 pylint
 matplotlib
+sphinx
+sphinx-rtd-theme
+sphinx-autodoc-typehints
+myst-parser

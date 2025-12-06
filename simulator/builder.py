@@ -7,6 +7,7 @@ import numpy as np  # para NonLinearResistor
 
 from .parser import NetlistOOP, TransientSettings
 
+from .elements.base import Element
 from .elements.resistor import Resistor
 from .elements.capacitor import Capacitor
 from .elements.inductor import Inductor
@@ -39,7 +40,7 @@ class CircuitBuilder:
     O_count: int = 0
 
 
-    elements: List[object] = field(default_factory=list)
+    elements: List[Element] = field(default_factory=list)
     transient: TransientSettings = field(default_factory=TransientSettings)
 
     def rename(self, new_name: str):

@@ -220,7 +220,7 @@ def main_menu(circuit_name: str):
     print("\t8. Rodar simulação")
     print("\t0. Sair")
 
-def build_circuit() -> Tuple[Circuit, str]:
+def build_circuit() -> Tuple[Circuit, str, str]:
     builder = CircuitBuilder()
     sim_file: str = ""
 
@@ -375,7 +375,7 @@ def build_circuit() -> Tuple[Circuit, str]:
             print("Opção inválida. Tente novamente.")
 
     print ("\n\nFINALIZANDO CONSTRUÇÃO DO CIRCUITO...")
-    return Circuit(new_circuit), sim_file  # Placeholder implementation
+    return Circuit(new_circuit), sim_file, builder.name  # Placeholder implementation
 
 # ------------------------------------------------#
 #                     HELPER                      #
@@ -418,7 +418,7 @@ def save_sim_file(
         headers.extend(extra_signals.keys())
 
     with path.open("w") as f:
-        f.write("* Gerado pelo ITM simulator\n")
+        f.write("* Gerado por ITM simulator\n")
         f.write(" ".join(headers) + "\n")
 
         n_steps = len(t)
@@ -444,7 +444,7 @@ def _cli():
     parser.add_argument("--netlist", type=str)
     parser.add_argument("--nr_tol", type=float, default=1e-8)
     parser.add_argument("--nodes", nargs="+", type=int, default=None)
-    parser.add_argument("--guide", type=str) # existing .sim file path to print alongsige
+    parser.add_argument("--guide", type=str, default=None) # existing .sim file path to print alongsige
     parser.add_argument("--create_sim", action="store_true", default=True) # create .sim file after simulating
 
     
@@ -453,12 +453,13 @@ def _cli():
 
     # Built or open existing circuit
     if args.netlist is None:
-        circuit, sim_file = build_circuit()
+        circuit, sim_file, netlist_name = build_circuit()
         print("\n[INFO] Circuito criado via modo interativo.")
     else:
+        netlist_name = str(args.netlist)[:-4]
         netlist = parse_netlist(args.netlist)
         circuit = Circuit(netlist)
-        print(f"\n[INFO] Netlist carregada de: {netlist_path}")
+        print(f"\n[INFO] Netlist carregada de: {netlist_name}.net")
         if args.guide:
             sim_file = args.guide
 
@@ -518,7 +519,7 @@ def _cli():
         # ----------------- Save sim file meanwhile -----------------
 
         if args.create_sim:
-            base_name = netlist_path if netlist_path is not None else "interactive_circuit"
+            base_name = (netlist_name.replace("/", "_")).replace(".", "") if netlist_name is not None else "interactive_circuit"
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
             base_name += "_" + timestamp

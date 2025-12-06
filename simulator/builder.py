@@ -362,42 +362,179 @@ class CircuitBuilder:
                     base += f" IC={elem.i0}"
                 lines.append(base)
 
-            # ----------------- FONTE DE CORRENTE -----------------
+ # ----------------- FONTE DE CORRENTE -----------------
             elif isinstance(elem, CurrentSource):
-                # Aqui assumo que o caso mais comum é DC
-                # Formato: Iname a b DC valor
-                dc = getattr(elem, "dc", 0.0)
-                is_ac = getattr(elem, "is_ac", False)
-                if not is_ac:
+                # Formatos suportados:
+                # Iname a b DC <dc>
+                # Iname a b AC <dc> <amp> <freq> <phase>
+                # Iname a b SIN <offset> <amplitude> <freq> <delay> <damping> <phase>
+                # Iname a b PULSE <i1> <i2> <delay> <rise> <fall> <width> <period>
+                stype = getattr(elem, "source_type", "DC").upper()
+
+                if stype == "DC":
+                    dc = getattr(elem, "dc", 0.0)
                     lines.append(f"{elem.name} {elem.a} {elem.b} DC {dc}")
+
+                elif stype == "AC":
+                    dc = getattr(elem, "dc", 0.0)
+                    amp = getattr(elem, "amp", 0.0)
+                    freq = getattr(elem, "freq", 0.0)
+                    phase = getattr(elem, "phase_deg", 0.0)
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} AC {dc} {amp} {freq} {phase}"
+                    )
+
+                elif stype == "SIN":
+                    params = getattr(elem, "sin_params", {}) or {}
+                    offset    = params.get("offset",    getattr(elem, "dc", 0.0))
+                    amplitude = params.get("amplitude", getattr(elem, "amp", 0.0))
+                    freq      = params.get("freq",      getattr(elem, "freq", 0.0))
+                    delay     = params.get("delay",     0.0)
+                    damping   = params.get("damping",   0.0)
+                    phase     = params.get("phase",     getattr(elem, "phase_deg", 0.0))
+
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} SIN "
+                        f"{offset} {amplitude} {freq} {delay} {damping} {phase}"
+                    )
+
+                elif stype == "PULSE":
+                    params = getattr(elem, "pulse_params", {}) or {}
+                    i1          = params.get("i1", getattr(elem, "dc", 0.0))
+                    i2          = params.get("i2", getattr(elem, "amp", 0.0))
+                    delay       = params.get("delay", 0.0)
+                    rise_time   = params.get("rise_time", 0.0)
+                    fall_time   = params.get("fall_time", 0.0)
+                    pulse_width = params.get("pulse_width", 0.0)
+                    period      = params.get("period", 0.0)
+
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} PULSE "
+                        f"{i1} {i2} {delay} {rise_time} {fall_time} {pulse_width} {period}"
+                    )
+
                 else:
-                    # Extensível depois para SIN/PULSE/etc.
-                    lines.append(f"* Fonte de corrente AC não suportada na exportação: {elem.name}")
+                    lines.append(
+                        f"* Fonte de corrente com tipo desconhecido: "
+                        f"{elem.name} (source_type={stype})"
+                    )
 
             # ----------------- FONTE DE TENSÃO -----------------
             elif isinstance(elem, VoltageSource):
-                dc = getattr(elem, "dc", 0.0)
-                is_ac = getattr(elem, "is_ac", False)
-                if not is_ac:
+                # Formatos suportados:
+                # Vname a b DC <dc>
+                # Vname a b AC <dc> <amp> <freq> <phase>
+                # Vname a b SIN <offset> <amplitude> <freq> <delay> <damping> <phase>
+                # Vname a b PULSE <v1> <v2> <delay> <rise> <fall> <width> <period>
+                stype = getattr(elem, "source_type", "DC").upper()
+
+                if stype == "DC":
+                    dc = getattr(elem, "dc", 0.0)
                     lines.append(f"{elem.name} {elem.a} {elem.b} DC {dc}")
+
+                elif stype == "AC":
+                    dc = getattr(elem, "dc", 0.0)
+                    amp = getattr(elem, "amp", 0.0)
+                    freq = getattr(elem, "freq", 0.0)
+                    phase = getattr(elem, "phase_deg", 0.0)
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} AC {dc} {amp} {freq} {phase}"
+                    )
+
+                elif stype == "SIN":
+                    params = getattr(elem, "sin_params", {}) or {}
+                    offset    = params.get("offset",    getattr(elem, "dc", 0.0))
+                    amplitude = params.get("amplitude", getattr(elem, "amp", 0.0))
+                    freq      = params.get("freq",      getattr(elem, "freq", 0.0))
+                    delay     = params.get("delay",     0.0)
+                    damping   = params.get("damping",   0.0)
+                    phase     = params.get("phase",     getattr(elem, "phase_deg", 0.0))
+
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} SIN "
+                        f"{offset} {amplitude} {freq} {delay} {damping} {phase}"
+                    )
+
+                elif stype == "PULSE":
+                    params = getattr(elem, "pulse_params", {}) or {}
+                    v1          = params.get("v1", getattr(elem, "dc", 0.0))
+                    v2          = params.get("v2", getattr(elem, "amp", 0.0))
+                    delay       = params.get("delay", 0.0)
+                    rise_time   = params.get("rise_time", 0.0)
+                    fall_time   = params.get("fall_time", 0.0)
+                    pulse_width = params.get("pulse_width", 0.0)
+                    period      = params.get("period", 0.0)
+
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} PULSE "
+                        f"{v1} {v2} {delay} {rise_time} {fall_time} {pulse_width} {period}"
+                    )
+
                 else:
-                    # TODO: Add other voltage sources
-                    lines.append(f"* Fonte de tensão AC não suportada na exportação: {elem.name}")
+                    lines.append(
+                        f"* Fonte de tensão com tipo desconhecido: "
+                        f"{elem.name} (source_type={stype})"
+                    )
 
             # ----------------- RESISTOR NÃO LINEAR -----------------
             elif isinstance(elem, NonLinearResistor):
-                # Especificação de netlist para esse cara ainda não está formalizada,
-                # então deixo como comentário para não quebrar o parser.
-                lines.append(f"* NonLinearResistor {elem.name} {elem.a} {elem.b}")
+                # Formato: Nname a b V1 I1 V2 I2 V3 I3 V4 I4
+                V_pts = list(getattr(elem, "V_points", []))
+                I_pts = list(getattr(elem, "I_points", []))
+
+                if len(V_pts) == 4 and len(I_pts) == 4:
+                    lines.append(
+                        f"{elem.name} {elem.a} {elem.b} "
+                        f"{V_pts[0]} {I_pts[0]} "
+                        f"{V_pts[1]} {I_pts[1]} "
+                        f"{V_pts[2]} {I_pts[2]} "
+                        f"{V_pts[3]} {I_pts[3]}"
+                    )
+                else:
+                    # Caso algo esteja inconsistente, não quebra o arquivo.
+                    lines.append(
+                        f"* NonLinearResistor mal definido: "
+                        f"{elem.name} {elem.a} {elem.b} (esperados 4 pontos)"
+                    )
 
             # ----------------- DIODO -----------------
             elif isinstance(elem, Diode):
                 # Formato: Dname a b
                 lines.append(f"{elem.name} {elem.a} {elem.b}")
 
-            # ----------------- OUTROS -----------------
+             # ----------------- FONTES CONTROLADAS E OPAMP -----------------
+            elif isinstance(elem, VCVS):
+                # VCVS: Ename a b c d gain
+                lines.append(
+                    f"{elem.name} {elem.a} {elem.b} {elem.c} {elem.d} {elem.gain}"
+                )
+
+            elif isinstance(elem, CCCS):
+                # CCCS: Fname a b c d gain
+                lines.append(
+                    f"{elem.name} {elem.a} {elem.b} {elem.c} {elem.d} {elem.gain}"
+                )
+
+            elif isinstance(elem, VCCS):
+                # VCCS: Gname a b c d gm
+                lines.append(
+                    f"{elem.name} {elem.a} {elem.b} {elem.c} {elem.d} {elem.gm}"
+                )
+
+            elif isinstance(elem, CCVS):
+                # CCVS: Hname a b c d rm
+                lines.append(
+                    f"{elem.name} {elem.a} {elem.b} {elem.c} {elem.d} {elem.rm}"
+                )
+
+            elif isinstance(elem, OpAmp):
+                # Amplificador operacional ideal:
+                # O name vp vn vo
+                vp = elem.c   # entrada não inversora
+                vn = elem.d   # entrada inversora
+                vo = elem.a   # saída
+                lines.append(f"{elem.name} {vp} {vn} {vo}")
             else:
-                # TODO: Add opamp and controlled sources
                 # Não impede salvar o arquivo, só documenta o elemento
                 lines.append(f"* Elemento não suportado na exportação: {elem}")
 

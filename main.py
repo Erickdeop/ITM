@@ -519,7 +519,7 @@ def _cli():
         # ----------------- Save sim file meanwhile -----------------
 
         if args.create_sim:
-            base_name = netlist_name.replace("/", "_") if netlist_name is not None else "interactive_circuit"
+            base_name = (netlist_name.replace("/", "_")).replace(".", "") if netlist_name is not None else "interactive_circuit"
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
             base_name += "_" + timestamp

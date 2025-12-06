@@ -38,7 +38,7 @@ pip install -r requirements.txt
 ```
 
 ### Exemplos de Uso
-
+#### Circuito manual
 ```bash
 python3 main.py
 
@@ -56,15 +56,15 @@ python3 main.py
 # Escolha uma opção:
 ```
 
-# Análise DC de divisor de tensão
+#### Análise DC de divisor de tensão
 ```bash
 python main.py --netlist ./circuits/vdc_divider.net
 ```
-# Análise transiente de circuito RC com fonte senoidal
+#### Análise transiente de circuito RC com fonte senoidal
 ```bash
 python main.py --netlist ./circuits/rc_sine_parallel.net
 ```
-# Circuito com fonte PULSE
+#### Circuito com fonte PULSE
 ```bash
 python main.py --netlist ./circuits/pulse.net
 ```
